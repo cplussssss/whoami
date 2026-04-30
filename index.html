@@ -1,928 +1,1390 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>我是誰？AI 習慣導航員</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700&family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
-        rel="stylesheet" />
-    <style>
-        /* =============================================
-       CSS 變數
-    ============================================= */
-        :root {
-            --bg: #f5f2ec;
-            --bg-card: #faf8f4;
-            --ink: #1c1a17;
-            --ink-muted: #6b6760;
-            --ink-faint: #b0ada8;
-            --accent: #c85a2a;
-            /* 番茄橘 */
-            --accent-soft: #f0ddd3;
-            --green: #3a7d5e;
-            --green-soft: #d4ece1;
-            --blue: #2d5fa8;
-            --blue-soft: #d4e2f5;
-            --border: #e2ddd6;
-            --shadow: rgba(28, 26, 23, 0.08);
-
-            --font-serif: 'Noto Serif TC', serif;
-            --font-mono: 'Space Mono', monospace;
-            --font-sans: 'DM Sans', sans-serif;
-        }
-
-        /* =============================================
-       Reset & Base
-    ============================================= */
-        *,
-        *::before,
-        *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        html {
-            font-size: 16px;
-            scroll-behavior: smooth;
-        }
-
-        body {
-            background: var(--bg);
-            color: var(--ink);
-            font-family: var(--font-sans);
-            line-height: 1.65;
-            min-height: 100vh;
-        }
-
-        /* =============================================
-       頂部導覽
-    ============================================= */
-        .topbar {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            background: var(--bg);
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 32px;
-            height: 56px;
-        }
-
-        .topbar-brand {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            text-decoration: none;
-            color: var(--ink);
-        }
-
-        .topbar-brand .dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: var(--accent);
-        }
-
-        .topbar-brand span {
-            font-family: var(--font-serif);
-            font-size: 0.95rem;
-            font-weight: 600;
-            letter-spacing: 0.02em;
-        }
-
-        .topbar-nav {
-            display: flex;
-            gap: 4px;
-        }
-
-        .nav-tab {
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 0.82rem;
-            font-weight: 500;
-            color: var(--ink-muted);
-            cursor: pointer;
-            border: none;
-            background: transparent;
-            transition: all 0.18s;
-            font-family: var(--font-sans);
-            letter-spacing: 0.01em;
-        }
-
-        .nav-tab:hover {
-            background: var(--border);
-            color: var(--ink);
-        }
-
-        .nav-tab.active {
-            background: var(--ink);
-            color: var(--bg);
-        }
-
-        /* =============================================
-       主容器
-    ============================================= */
-        .app {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 40px 24px 80px;
-        }
-
-        /* =============================================
-       頁面（分頁切換）
-    ============================================= */
-        .page {
-            display: none;
-        }
-
-        .page.active {
-            display: block;
-        }
-
-        /* =============================================
-       首頁 Hero
-    ============================================= */
-        .hero {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 48px;
-            align-items: start;
-            margin-bottom: 64px;
-        }
-
-        @media (max-width: 720px) {
-            .hero {
-                grid-template-columns: 1fr;
-                gap: 32px;
-            }
-        }
-
-        .hero-text {}
-
-        .hero-eyebrow {
-            font-family: var(--font-mono);
-            font-size: 0.72rem;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            color: var(--accent);
-            margin-bottom: 16px;
-        }
-
-        .hero-title {
-            font-family: var(--font-serif);
-            font-size: clamp(2rem, 4vw, 2.8rem);
-            font-weight: 700;
-            line-height: 1.25;
-            margin-bottom: 20px;
-            color: var(--ink);
-        }
-
-        .hero-title em {
-            font-style: normal;
-            color: var(--accent);
-        }
-
-        .hero-desc {
-            font-size: 1rem;
-            color: var(--ink-muted);
-            line-height: 1.75;
-            max-width: 420px;
-        }
-
-        .hero-stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            margin-top: 32px;
-        }
-
-        .stat-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 20px 18px;
-        }
-
-        .stat-number {
-            font-family: var(--font-mono);
-            font-size: 1.9rem;
-            font-weight: 700;
-            color: var(--ink);
-            line-height: 1;
-            margin-bottom: 4px;
-        }
-
-        .stat-number span {
-            font-size: 1rem;
-            color: var(--accent);
-        }
-
-        .stat-label {
-            font-size: 0.78rem;
-            color: var(--ink-muted);
-        }
-
-        /* =============================================
-       今日狀態卡（首頁右側）
-    ============================================= */
-        .today-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 28px 24px;
-        }
-
-        .today-card-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 20px;
-        }
-
-        .today-card-header h3 {
-            font-family: var(--font-serif);
-            font-size: 1rem;
-            font-weight: 600;
-        }
-
-        .badge-new {
-            font-family: var(--font-mono);
-            font-size: 0.62rem;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            background: var(--accent-soft);
-            color: var(--accent);
-            padding: 2px 8px;
-            border-radius: 4px;
-        }
-
-        .checkin-form {}
-
-        .checkin-label {
-            font-size: 0.8rem;
-            color: var(--ink-muted);
-            margin-bottom: 8px;
-            display: block;
-        }
-
-        .mood-row {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 16px;
-            flex-wrap: wrap;
-        }
-
-        .mood-btn {
-            padding: 8px 14px;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            background: transparent;
-            font-size: 0.82rem;
-            color: var(--ink-muted);
-            cursor: pointer;
-            transition: all 0.15s;
-            font-family: var(--font-sans);
-        }
-
-        .mood-btn:hover {
-            border-color: var(--ink-muted);
-            color: var(--ink);
-        }
-
-        .mood-btn.selected {
-            background: var(--ink);
-            color: var(--bg);
-            border-color: var(--ink);
-        }
-
-        .energy-row {
-            display: flex;
-            gap: 6px;
-            margin-bottom: 20px;
-        }
-
-        .energy-dot {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            border: 1.5px solid var(--border);
-            cursor: pointer;
-            transition: all 0.15s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.7rem;
-            font-family: var(--font-mono);
-            color: var(--ink-faint);
-        }
-
-        .energy-dot:hover {
-            border-color: var(--accent);
-        }
-
-        .energy-dot.filled {
-            background: var(--accent);
-            border-color: var(--accent);
-            color: white;
-        }
-
-        .checkin-btn {
-            width: 100%;
-            padding: 12px;
-            border-radius: 10px;
-            border: none;
-            background: var(--ink);
-            color: var(--bg);
-            font-size: 0.88rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: opacity 0.15s;
-            font-family: var(--font-sans);
-        }
-
-        .checkin-btn:hover {
-            opacity: 0.85;
-        }
-
-        .checkin-btn:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
-
-        .ai-suggestion {
-            display: none;
-            margin-top: 16px;
-            padding: 14px 16px;
-            background: var(--accent-soft);
-            border-radius: 10px;
-            border-left: 3px solid var(--accent);
-        }
-
-        .ai-suggestion.show {
-            display: block;
-        }
-
-        .ai-suggestion-label {
-            font-family: var(--font-mono);
-            font-size: 0.65rem;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            color: var(--accent);
-            margin-bottom: 6px;
-        }
-
-        .ai-suggestion-text {
-            font-size: 0.85rem;
-            color: var(--ink);
-            line-height: 1.6;
-        }
-
-        /* =============================================
-       三層多巴胺說明區
-    ============================================= */
-        .section-title {
-            font-family: var(--font-serif);
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin-bottom: 20px;
-        }
-
-        .dopamine-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-            margin-bottom: 48px;
-        }
-
-        @media (max-width: 600px) {
-            .dopamine-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .dopamine-card {
-            border-radius: 14px;
-            padding: 24px 20px;
-            border: 1px solid var(--border);
-        }
-
-        .dopamine-card.immediate {
-            background: #fff8f5;
-        }
-
-        .dopamine-card.short {
-            background: #f5faf7;
-        }
-
-        .dopamine-card.long {
-            background: #f5f8ff;
-        }
-
-        .dopamine-icon {
-            font-size: 1.6rem;
-            margin-bottom: 12px;
-        }
-
-        .dopamine-tag {
-            font-family: var(--font-mono);
-            font-size: 0.65rem;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            margin-bottom: 8px;
-            font-weight: 700;
-        }
-
-        .dopamine-card.immediate .dopamine-tag {
-            color: var(--accent);
-        }
-
-        .dopamine-card.short .dopamine-tag {
-            color: var(--green);
-        }
-
-        .dopamine-card.long .dopamine-tag {
-            color: var(--blue);
-        }
-
-        .dopamine-name {
-            font-family: var(--font-serif);
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .dopamine-desc {
-            font-size: 0.82rem;
-            color: var(--ink-muted);
-            line-height: 1.6;
-        }
-
-        /* =============================================
-       番茄鐘分頁
-    ============================================= */
-        .focus-page-header {
-            margin-bottom: 28px;
-        }
-
-        .focus-page-header h2 {
-            font-family: var(--font-serif);
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 6px;
-        }
-
-        .focus-page-header p {
-            font-size: 0.88rem;
-            color: var(--ink-muted);
-        }
-
-        .iframe-wrapper {
-            width: 100%;
-            border-radius: 16px;
-            overflow: hidden;
-            border: 1px solid var(--border);
-            background: #1a1a1e;
-            box-shadow: 0 8px 40px var(--shadow);
-        }
-
-        .iframe-wrapper iframe {
-            width: 100%;
-            height: 820px;
-            border: none;
-            display: block;
-        }
-
-        @media (max-width: 600px) {
-            .iframe-wrapper iframe {
-                height: 900px;
-            }
-        }
-
-        /* =============================================
-       進度分頁（佔位）
-    ============================================= */
-        .coming-soon {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 400px;
-            text-align: center;
-            gap: 12px;
-        }
-
-        .coming-soon-icon {
-            font-size: 3rem;
-        }
-
-        .coming-soon h3 {
-            font-family: var(--font-serif);
-            font-size: 1.3rem;
-            color: var(--ink);
-        }
-
-        .coming-soon p {
-            font-size: 0.88rem;
-            color: var(--ink-muted);
-            max-width: 320px;
-        }
-
-        .coming-soon-badge {
-            font-family: var(--font-mono);
-            font-size: 0.68rem;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            background: var(--border);
-            color: var(--ink-muted);
-            padding: 4px 12px;
-            border-radius: 20px;
-        }
-
-        /* =============================================
-       Loading 動畫
-    ============================================= */
-        .iframe-loading {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 820px;
-            gap: 8px;
-            color: var(--ink-faint);
-            font-family: var(--font-mono);
-            font-size: 0.8rem;
-        }
-
-        .loading-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: var(--accent);
-            animation: blink 1.2s infinite;
-        }
-
-        .loading-dot:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-
-        .loading-dot:nth-child(3) {
-            animation-delay: 0.4s;
-        }
-
-        @keyframes blink {
-
-            0%,
-            80%,
-            100% {
-                opacity: 0.2;
-                transform: scale(0.8);
-            }
-
-            40% {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        /* =============================================
-       動畫：頁面進場
-    ============================================= */
-        @keyframes fadeUp {
-            from {
-                opacity: 0;
-                transform: translateY(16px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .page.active>* {
-            animation: fadeUp 0.3s ease both;
-        }
-
-        .page.active>*:nth-child(2) {
-            animation-delay: 0.05s;
-        }
-
-        .page.active>*:nth-child(3) {
-            animation-delay: 0.1s;
-        }
-    </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AI 習慣導航員</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;600;700&family=DM+Mono:wght@300;400;500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet"/>
+<style>
+/* ═══════════════════════════════════════
+   VARIABLES
+═══════════════════════════════════════ */
+:root {
+  --bg:           #f0ede8;
+  --bg2:          #e8e4dd;
+  --surface:      #faf8f5;
+  --surface2:     #f3f0ea;
+  --border:       rgba(0,0,0,0.08);
+  --border2:      rgba(0,0,0,0.12);
+  --ink:          #1a1814;
+  --ink2:         #5a5650;
+  --ink3:         #9a9490;
+  --accent:       #c0522a;
+  --accent-bg:    rgba(192,82,42,0.08);
+  --accent-mid:   rgba(192,82,42,0.18);
+  --green:        #2e7d5c;
+  --green-bg:     rgba(46,125,92,0.08);
+  --blue:         #2c5f8a;
+  --blue-bg:      rgba(44,95,138,0.08);
+  --gold:         #a07830;
+  --gold-bg:      rgba(160,120,48,0.1);
+
+  --serif:   'Noto Serif TC', serif;
+  --mono:    'DM Mono', monospace;
+  --sans:    'DM Sans', sans-serif;
+
+  --r-sm:  8px;
+  --r-md:  14px;
+  --r-lg:  20px;
+  --r-xl:  28px;
+
+  --ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* ═══════════════════════════════════════
+   RESET
+═══════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; height: 100%; }
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--ink);
+  height: 100%;
+  overflow: hidden;
+  line-height: 1.6;
+}
+button { font-family: var(--sans); cursor: pointer; border: none; background: none; }
+input, textarea { font-family: var(--sans); }
+
+/* ═══════════════════════════════════════
+   APP SHELL  — left fixed / right scroll
+═══════════════════════════════════════ */
+.app {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* LEFT PANEL */
+.left {
+  background: var(--surface);
+  border-right: 1px solid var(--border2);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  padding: 28px 24px;
+  gap: 0;
+  position: relative;
+}
+
+/* RIGHT PANEL */
+.right {
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 100vh;
+  padding: 28px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.right::-webkit-scrollbar { width: 4px; }
+.right::-webkit-scrollbar-track { background: transparent; }
+.right::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+/* ═══════════════════════════════════════
+   LEFT — LOGO
+═══════════════════════════════════════ */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+.logo-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+  box-shadow: 0 0 0 3px var(--accent-bg);
+}
+.logo-text {
+  font-family: var(--serif);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: 0.01em;
+}
+
+/* ═══════════════════════════════════════
+   LEFT — SCREENS (state machine)
+═══════════════════════════════════════ */
+.left-screen { display: none; flex-direction: column; flex: 1; gap: 0; overflow: hidden; }
+.left-screen.active { display: flex; }
+
+/* Screen: checkin */
+#screen-checkin {}
+
+.screen-label {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 12px;
+}
+.screen-question {
+  font-family: var(--serif);
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--ink);
+  margin-bottom: 20px;
+}
+
+.state-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.state-opt {
+  padding: 13px 16px;
+  border-radius: var(--r-md);
+  border: 1.5px solid var(--border2);
+  background: transparent;
+  font-size: 0.88rem;
+  color: var(--ink2);
+  text-align: left;
+  transition: all 0.18s var(--ease);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.state-opt:hover {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+  color: var(--ink);
+  transform: translateX(3px);
+}
+.state-opt.selected {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+  color: var(--ink);
+}
+.state-opt .opt-emoji { font-size: 1.1rem; }
+.state-opt .opt-text { font-weight: 400; }
+
+/* goal input */
+.goal-input-wrap {
+  margin-bottom: 16px;
+}
+.goal-input-wrap label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--ink3);
+  margin-bottom: 6px;
+  font-family: var(--mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.goal-input {
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: var(--r-sm);
+  border: 1.5px solid var(--border2);
+  background: var(--bg);
+  font-size: 0.88rem;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.15s;
+}
+.goal-input:focus { border-color: var(--accent); }
+.goal-input::placeholder { color: var(--ink3); }
+
+/* ═══════════════════════════════════════
+   LEFT — TASK CARD
+═══════════════════════════════════════ */
+#screen-task {
+  animation: slideIn 0.35s var(--ease) both;
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.task-card {
+  background: var(--bg);
+  border: 1.5px solid var(--border2);
+  border-radius: var(--r-lg);
+  padding: 20px;
+  margin-bottom: 16px;
+  position: relative;
+  overflow: hidden;
+}
+.task-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 3px; height: 100%;
+  background: var(--accent);
+  border-radius: 0 2px 2px 0;
+}
+.task-duration {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.task-title {
+  font-family: var(--serif);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--ink);
+  margin-bottom: 10px;
+}
+.task-why {
+  font-size: 0.8rem;
+  color: var(--ink2);
+  line-height: 1.55;
+  font-style: italic;
+}
+
+.ai-note {
+  background: var(--accent-bg);
+  border-radius: var(--r-sm);
+  padding: 12px 14px;
+  font-size: 0.82rem;
+  color: var(--ink2);
+  line-height: 1.6;
+  margin-bottom: 20px;
+  border-left: 2px solid var(--accent);
+}
+.ai-note strong { color: var(--accent); font-weight: 500; }
+
+.left-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 16px;
+}
+
+.btn-primary {
+  padding: 14px;
+  border-radius: var(--r-md);
+  background: var(--ink);
+  color: var(--surface);
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  transition: all 0.18s var(--ease);
+  text-align: center;
+}
+.btn-primary:hover {
+  background: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(192,82,42,0.25);
+}
+.btn-secondary {
+  padding: 12px;
+  border-radius: var(--r-md);
+  background: transparent;
+  border: 1.5px solid var(--border2);
+  color: var(--ink2);
+  font-size: 0.84rem;
+  transition: all 0.15s;
+  text-align: center;
+}
+.btn-secondary:hover {
+  border-color: var(--ink2);
+  color: var(--ink);
+  background: var(--bg2);
+}
+.btn-reset {
+  padding: 11px;
+  border-radius: var(--r-md);
+  background: transparent;
+  color: var(--ink3);
+  font-size: 0.8rem;
+  text-align: center;
+  transition: color 0.15s;
+}
+.btn-reset:hover { color: var(--ink2); }
+
+/* ═══════════════════════════════════════
+   LEFT — FOCUS MODE
+═══════════════════════════════════════ */
+#screen-focus {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 20px;
+}
+.focus-only-label {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink3);
+}
+.focus-task-display {
+  font-family: var(--serif);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.4;
+  padding: 0 12px;
+}
+.focus-encouragement {
+  font-size: 0.82rem;
+  color: var(--ink3);
+  font-style: italic;
+}
+.focus-done-btn {
+  width: 100%;
+  padding: 16px;
+  border-radius: var(--r-md);
+  background: var(--green);
+  color: white;
+  font-size: 0.92rem;
+  font-weight: 500;
+  margin-top: 8px;
+  transition: all 0.18s var(--ease);
+}
+.focus-done-btn:hover {
+  background: #226147;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(46,125,92,0.3);
+}
+.focus-quit-btn {
+  color: var(--ink3);
+  font-size: 0.8rem;
+  padding: 8px;
+  transition: color 0.15s;
+}
+.focus-quit-btn:hover { color: var(--ink2); }
+
+/* ═══════════════════════════════════════
+   LEFT — RESET / GENTLE
+═══════════════════════════════════════ */
+#screen-reset {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 16px;
+}
+.reset-emoji { font-size: 2.4rem; }
+.reset-title {
+  font-family: var(--serif);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+.reset-body {
+  font-size: 0.85rem;
+  color: var(--ink2);
+  line-height: 1.7;
+  padding: 0 8px;
+}
+.reset-actions { display: flex; flex-direction: column; gap: 8px; width: 100%; margin-top: 8px; }
+
+/* ═══════════════════════════════════════
+   LEFT — LOADING SPINNER
+═══════════════════════════════════════ */
+#screen-loading {
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  text-align: center;
+}
+.loading-ring {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  border: 2px solid var(--border2);
+  border-top-color: var(--accent);
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text {
+  font-size: 0.82rem;
+  color: var(--ink3);
+  font-family: var(--mono);
+}
+
+/* ═══════════════════════════════════════
+   RIGHT — SECTION HEADERS
+═══════════════════════════════════════ */
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.section-title {
+  font-family: var(--serif);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+.section-sub {
+  font-size: 0.75rem;
+  color: var(--ink3);
+  font-family: var(--mono);
+}
+
+/* ═══════════════════════════════════════
+   RIGHT — PROGRESS
+═══════════════════════════════════════ */
+.progress-card {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-lg);
+  padding: 22px 24px;
+}
+.progress-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.stat-item {}
+.stat-num {
+  font-family: var(--mono);
+  font-size: 1.6rem;
+  font-weight: 500;
+  color: var(--ink);
+  line-height: 1;
+  margin-bottom: 3px;
+}
+.stat-num small { font-size: 0.75rem; color: var(--ink3); margin-left: 2px; }
+.stat-lbl {
+  font-size: 0.72rem;
+  color: var(--ink3);
+}
+
+.progress-bar-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--ink3);
+  margin-bottom: 6px;
+}
+.progress-track {
+  height: 6px;
+  background: var(--bg2);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), #e07040);
+  border-radius: 3px;
+  transition: width 0.8s var(--ease);
+}
+
+/* ═══════════════════════════════════════
+   RIGHT — RECENT TASKS
+═══════════════════════════════════════ */
+.recent-card {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-lg);
+  padding: 20px 24px;
+}
+.task-log-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--border);
+}
+.task-log-item:last-child { border-bottom: none; }
+.task-log-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  margin-top: 6px;
+  flex-shrink: 0;
+}
+.task-log-dot.done { background: var(--green); }
+.task-log-dot.skipped { background: var(--ink3); }
+.task-log-content { flex: 1; }
+.task-log-name {
+  font-size: 0.85rem;
+  color: var(--ink);
+  margin-bottom: 2px;
+  font-weight: 400;
+}
+.task-log-meta {
+  font-family: var(--mono);
+  font-size: 0.67rem;
+  color: var(--ink3);
+}
+.task-log-empty {
+  text-align: center;
+  padding: 32px 0;
+  color: var(--ink3);
+  font-size: 0.82rem;
+}
+
+/* ═══════════════════════════════════════
+   RIGHT — AI ENCOURAGEMENT
+═══════════════════════════════════════ */
+.encouragement-card {
+  background: linear-gradient(135deg, #fdf6f0 0%, #f5f0f8 100%);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-lg);
+  padding: 22px 24px;
+  position: relative;
+  overflow: hidden;
+}
+.encouragement-card::after {
+  content: '✦';
+  position: absolute;
+  right: 20px; top: 16px;
+  font-size: 1.2rem;
+  color: var(--accent);
+  opacity: 0.3;
+}
+.enc-label {
+  font-family: var(--mono);
+  font-size: 0.63rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+.enc-text {
+  font-family: var(--serif);
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--ink);
+  line-height: 1.65;
+}
+.identity-line {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  font-size: 0.8rem;
+  color: var(--ink3);
+}
+.identity-line strong {
+  color: var(--green);
+  font-weight: 500;
+}
+
+/* ═══════════════════════════════════════
+   RIGHT — WEEKLY CHART
+═══════════════════════════════════════ */
+.weekly-card {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-lg);
+  padding: 20px 24px;
+}
+.week-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 80px;
+  margin-top: 8px;
+}
+.week-bar-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  height: 100%;
+  justify-content: flex-end;
+}
+.week-bar {
+  width: 100%;
+  border-radius: 4px 4px 0 0;
+  background: var(--border2);
+  transition: height 0.6s var(--ease), background 0.3s;
+  min-height: 4px;
+}
+.week-bar.today { background: var(--accent); }
+.week-bar.has-data { background: var(--accent-mid); }
+.week-day {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  color: var(--ink3);
+  text-transform: uppercase;
+}
+.week-day.today { color: var(--accent); font-weight: 700; }
+
+/* ═══════════════════════════════════════
+   RIGHT — INSIGHT
+═══════════════════════════════════════ */
+.insight-card {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-lg);
+  padding: 20px 24px;
+}
+.insight-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.insight-item:last-child { border-bottom: none; }
+.insight-icon {
+  font-size: 1rem;
+  margin-top: 1px;
+  flex-shrink: 0;
+}
+.insight-text {
+  font-size: 0.83rem;
+  color: var(--ink2);
+  line-height: 1.55;
+}
+
+/* ═══════════════════════════════════════
+   RIGHT — FOCUS TIMER (iframe)
+═══════════════════════════════════════ */
+.focus-iframe-card {
+  display: none;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  flex-direction: column;
+}
+.focus-iframe-card.show { display: flex; }
+.focus-iframe-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.focus-iframe-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.focus-iframe-label {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink2);
+}
+.focus-iframe-card iframe {
+  width: 100%;
+  height: 700px;
+  border: none;
+  display: block;
+  background: #1a1a1e;
+}
+
+/* ═══════════════════════════════════════
+   COMPLETION ANIMATION OVERLAY
+═══════════════════════════════════════ */
+.completion-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(240,237,232,0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+  backdrop-filter: blur(4px);
+}
+.completion-overlay.show {
+  opacity: 1;
+  pointer-events: all;
+}
+.completion-inner {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  animation: popIn 0.4s var(--ease) both;
+}
+@keyframes popIn {
+  from { transform: scale(0.85); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+.completion-emoji { font-size: 3rem; }
+.completion-title {
+  font-family: var(--serif);
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+.completion-msg {
+  font-size: 0.9rem;
+  color: var(--ink2);
+  max-width: 280px;
+  line-height: 1.65;
+}
+.completion-btn {
+  margin-top: 8px;
+  padding: 14px 32px;
+  border-radius: var(--r-md);
+  background: var(--ink);
+  color: var(--surface);
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all 0.18s var(--ease);
+}
+.completion-btn:hover {
+  background: var(--green);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(46,125,92,0.3);
+}
+
+/* ═══════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════ */
+@media (max-width: 800px) {
+  body { overflow: auto; }
+  .app {
+    grid-template-columns: 1fr;
+    height: auto;
+    overflow: visible;
+  }
+  .left {
+    height: auto;
+    overflow: visible;
+    padding: 24px 20px;
+  }
+  .right {
+    height: auto;
+    overflow: visible;
+    padding: 20px;
+  }
+  .focus-iframe-card iframe { height: 600px; }
+}
+</style>
 </head>
-
 <body>
 
-    <!-- ===== 頂部導覽 ===== -->
-    <nav class="topbar">
-        <a class="topbar-brand" href="#">
-            <div class="dot"></div>
-            <span>我是誰？AI 習慣導航員</span>
-        </a>
-        <div class="topbar-nav">
-            <button class="nav-tab active" data-page="home">首頁</button>
-            <button class="nav-tab" data-page="focus">專注計時</button>
-            <button class="nav-tab" data-page="progress">我的進度</button>
-            <button class="nav-tab" data-page="identity">我是誰</button>
+<!-- ════════════════════════
+     COMPLETION OVERLAY
+════════════════════════ -->
+<div class="completion-overlay" id="completionOverlay">
+  <div class="completion-inner">
+    <div class="completion-emoji">🎉</div>
+    <div class="completion-title">你已經開始了</div>
+    <div class="completion-msg" id="completionMsg">你完成了一輪專注。每一次開始，都是改變的積累。</div>
+    <button class="completion-btn" onclick="closeCompletion()">繼續下一輪</button>
+  </div>
+</div>
+
+<!-- ════════════════════════
+     APP
+════════════════════════ -->
+<div class="app">
+
+  <!-- ══════ LEFT PANEL ══════ -->
+  <aside class="left">
+
+    <!-- Logo -->
+    <div class="logo">
+      <div class="logo-dot"></div>
+      <div class="logo-text">AI 習慣導航員</div>
+    </div>
+
+    <!-- SCREEN: CHECKIN -->
+    <div class="left-screen active" id="screen-checkin">
+      <div class="screen-label">今日狀態</div>
+      <div class="screen-question">你現在的狀態是？</div>
+
+      <div class="state-options">
+        <button class="state-opt" data-state="exhausted" onclick="selectState(this)">
+          <span class="opt-emoji">😴</span>
+          <span class="opt-text">很累，腦子轉不動</span>
+        </button>
+        <button class="state-opt" data-state="tired" onclick="selectState(this)">
+          <span class="opt-emoji">😮‍💨</span>
+          <span class="opt-text">有點累，但想動一下</span>
+        </button>
+        <button class="state-opt" data-state="neutral" onclick="selectState(this)">
+          <span class="opt-emoji">😌</span>
+          <span class="opt-text">普通，可以開始</span>
+        </button>
+        <button class="state-opt" data-state="energized" onclick="selectState(this)">
+          <span class="opt-emoji">⚡</span>
+          <span class="opt-text">有動力，想做點事</span>
+        </button>
+      </div>
+
+      <div class="goal-input-wrap">
+        <label>想做什麼事？（選填）</label>
+        <input class="goal-input" id="goalInput" type="text" placeholder="例：讀書、運動、寫報告…"/>
+      </div>
+
+      <div style="margin-top:auto">
+        <button class="btn-primary" id="generateBtn" onclick="generateTask()" style="opacity:0.4;pointer-events:none;width:100%">
+          幫我生成今天的第一步 →
+        </button>
+      </div>
+    </div>
+
+    <!-- SCREEN: LOADING -->
+    <div class="left-screen" id="screen-loading">
+      <div class="loading-ring"></div>
+      <div class="loading-text">AI 正在分析你的狀態…</div>
+    </div>
+
+    <!-- SCREEN: TASK -->
+    <div class="left-screen" id="screen-task">
+      <div class="screen-label">你的第一步</div>
+
+      <div class="task-card">
+        <div class="task-duration" id="taskDuration">3 分鐘</div>
+        <div class="task-title" id="taskTitle">任務載入中…</div>
+        <div class="task-why" id="taskWhy"></div>
+      </div>
+
+      <div class="ai-note" id="aiNote">AI 分析中…</div>
+
+      <div class="left-actions">
+        <button class="btn-primary" onclick="startFocus()">開始專注 →</button>
+        <button class="btn-secondary" onclick="showPomodoro()">用番茄鐘計時</button>
+        <button class="btn-secondary" onclick="simplifyTask()">這個還是太難了</button>
+        <button class="btn-reset" onclick="showReset()">中斷，重新開始</button>
+      </div>
+    </div>
+
+    <!-- SCREEN: FOCUS -->
+    <div class="left-screen" id="screen-focus">
+      <div class="focus-only-label">專注模式</div>
+      <div style="font-family:var(--mono);font-size:0.7rem;color:var(--ink3)">只做這一件事</div>
+      <div class="focus-task-display" id="focusTaskDisplay">任務</div>
+      <div class="focus-encouragement" id="focusEncouragement">你可以的，先試 3 分鐘。</div>
+      <button class="focus-done-btn" onclick="completeTask()">✓ 完成了！</button>
+      <button class="focus-quit-btn" onclick="showReset()">沒做完，重新開始</button>
+    </div>
+
+    <!-- SCREEN: RESET -->
+    <div class="left-screen" id="screen-reset">
+      <div class="reset-emoji">🤍</div>
+      <div class="reset-title">沒關係，我們重新開始</div>
+      <div class="reset-body">
+        中斷不代表失敗。<br>
+        大腦只是需要一個更小的入口。
+      </div>
+      <div class="reset-actions">
+        <button class="btn-primary" onclick="simplifyAndRestart()" style="width:100%">給我更簡單的版本</button>
+        <button class="btn-secondary" onclick="goBackToCheckin()" style="width:100%">重新選擇今日狀態</button>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- ══════ RIGHT PANEL ══════ -->
+  <main class="right">
+
+    <!-- iframe 番茄鐘（平時隱藏，點「用番茄鐘計時」才出現） -->
+    <div class="focus-iframe-card" id="focusIframeCard">
+      <div class="focus-iframe-header">
+        <div class="focus-iframe-dot"></div>
+        <div class="focus-iframe-label">番茄鐘 · 正在計時</div>
+        <button onclick="hidePomodoro()" style="margin-left:auto;font-size:0.75rem;color:var(--ink3);cursor:pointer;background:none;border:none;font-family:var(--sans)">收起</button>
+      </div>
+      <iframe
+        id="pomodoroFrame"
+        src="about:blank"
+        title="番茄鐘"
+      ></iframe>
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-card">
+      <div class="section-head">
+        <div class="section-title">今日進度</div>
+        <div class="section-sub" id="todayDate">—</div>
+      </div>
+      <div class="progress-stats">
+        <div class="stat-item">
+          <div class="stat-num" id="statDone">0<small>輪</small></div>
+          <div class="stat-lbl">已完成</div>
         </div>
-    </nav>
-
-    <!-- ===== 主容器 ===== -->
-    <div class="app">
-
-        <!-- ══════════════════════════════
-       首頁
-  ══════════════════════════════ -->
-        <div class="page active" id="page-home">
-
-            <div class="hero">
-                <!-- 左：文案 -->
-                <div class="hero-text">
-                    <div class="hero-eyebrow">AI 行為設計系統</div>
-                    <h1 class="hero-title">
-                        不是叫你<em>更自律</em>，<br>
-                        而是幫你<em>更容易開始</em>
-                    </h1>
-                    <p class="hero-desc">
-                        大腦不是不想改變，而是總在選擇更低阻力的快樂。
-                        這裡的每一個功能，都是為了讓你的大腦願意持續下去而設計的。
-                    </p>
-
-                    <div class="hero-stats">
-                        <div class="stat-card">
-                            <div class="stat-number" id="stat-sessions">0 <span>輪</span></div>
-                            <div class="stat-label">累積專注輪數</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-number" id="stat-minutes">0 <span>分</span></div>
-                            <div class="stat-label">累積專注分鐘</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-number" id="stat-streak">0 <span>天</span></div>
-                            <div class="stat-label">連續使用天數</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-number" id="stat-rate">— <span>%</span></div>
-                            <div class="stat-label">任務完成率</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 右：今日狀態問診 -->
-                <div class="today-card">
-                    <div class="today-card-header">
-                        <h3>今日狀態問診</h3>
-                        <span class="badge-new">每日</span>
-                    </div>
-
-                    <div class="checkin-form">
-                        <label class="checkin-label">現在的心情是？</label>
-                        <div class="mood-row">
-                            <button class="mood-btn" data-mood="平靜">😌 平靜</button>
-                            <button class="mood-btn" data-mood="有動力">⚡ 有動力</button>
-                            <button class="mood-btn" data-mood="有點累">😮‍💨 有點累</button>
-                            <button class="mood-btn" data-mood="很焦慮">😰 很焦慮</button>
-                            <button class="mood-btn" data-mood="分心">🌀 分心</button>
-                        </div>
-
-                        <label class="checkin-label">目前的電量（1 = 快沒電，5 = 滿血）</label>
-                        <div class="energy-row" id="energyRow">
-                            <div class="energy-dot" data-level="1">1</div>
-                            <div class="energy-dot" data-level="2">2</div>
-                            <div class="energy-dot" data-level="3">3</div>
-                            <div class="energy-dot" data-level="4">4</div>
-                            <div class="energy-dot" data-level="5">5</div>
-                        </div>
-
-                        <button class="checkin-btn" id="checkinBtn" disabled>
-                            讓 AI 幫我調整今天的任務 →
-                        </button>
-
-                        <div class="ai-suggestion" id="aiSuggestion">
-                            <div class="ai-suggestion-label">AI 建議</div>
-                            <div class="ai-suggestion-text" id="aiSuggestionText">載入中…</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 三層多巴胺說明 -->
-            <h2 class="section-title">你的行為系統是怎麼設計的</h2>
-            <div class="dopamine-grid">
-                <div class="dopamine-card immediate">
-                    <div class="dopamine-icon">⚡</div>
-                    <div class="dopamine-tag">立即多巴胺</div>
-                    <div class="dopamine-name">3 秒內得到回饋</div>
-                    <div class="dopamine-desc">每次開始計時、完成一輪，立刻得到回應。解決啟動最困難的那一步。</div>
-                </div>
-                <div class="dopamine-card short">
-                    <div class="dopamine-icon">📈</div>
-                    <div class="dopamine-tag">短期多巴胺</div>
-                    <div class="dopamine-name">看見自己正在變好</div>
-                    <div class="dopamine-desc">每天、每週的進度累積可見。不是空洞的打卡，而是真實的前進感。</div>
-                </div>
-                <div class="dopamine-card long">
-                    <div class="dopamine-icon">🧭</div>
-                    <div class="dopamine-tag">長期多巴胺</div>
-                    <div class="dopamine-name">從做事變成成為某種人</div>
-                    <div class="dopamine-desc">把每一輪的習慣連結到你想成為的身份，讓改變穩定下來。</div>
-                </div>
-            </div>
-
+        <div class="stat-item">
+          <div class="stat-num" id="statMins">0<small>分</small></div>
+          <div class="stat-lbl">專注時間</div>
         </div>
-
-        <!-- ══════════════════════════════
-       專注計時（番茄鐘嵌入）
-  ══════════════════════════════ -->
-        <div class="page" id="page-focus">
-            <div class="focus-page-header">
-                <h2>專注計時</h2>
-                <p>你的番茄鐘，原汁原味。完成後 AI 會給你即時回饋。</p>
-            </div>
-            <div class="iframe-wrapper">
-                <div class="iframe-loading" id="iframeLoading">
-                    <div class="loading-dot"></div>
-                    <div class="loading-dot"></div>
-                    <div class="loading-dot"></div>
-                    <span style="margin-left:8px">載入番茄鐘中</span>
-                </div>
-                <iframe id="pomodoroFrame" src="https://cplussssss.github.io/Focus/" title="番茄鐘" style="display:none"
-                    onload="document.getElementById('iframeLoading').style.display='none'; this.style.display='block';"></iframe>
-            </div>
+        <div class="stat-item">
+          <div class="stat-num" id="statRate">—</div>
+          <div class="stat-lbl">完成率</div>
         </div>
+      </div>
+      <div class="progress-bar-label">
+        <span>今日目標：4 輪</span>
+        <span id="progressLabel">0 / 4</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill" style="width:0%"></div>
+      </div>
+    </div>
 
-        <!-- ══════════════════════════════
-       我的進度（佔位）
-  ══════════════════════════════ -->
-        <div class="page" id="page-progress">
-            <div class="coming-soon">
-                <div class="coming-soon-icon">📊</div>
-                <span class="coming-soon-badge">即將推出</span>
-                <h3>每日 & 每週進度</h3>
-                <p>你的專注紀錄、完成率、習慣連勝天數，都會在這裡看得到。</p>
-            </div>
+    <!-- AI Encouragement -->
+    <div class="encouragement-card">
+      <div class="enc-label">✦ AI 陪伴</div>
+      <div class="enc-text" id="encText">
+        打開這裡，就是一個開始。<br>不需要完美，只需要一小步。
+      </div>
+      <div class="identity-line" id="identityLine">
+        你正在成為一個 <strong id="identityWord">願意開始的人</strong>
+      </div>
+    </div>
+
+    <!-- Recent Tasks -->
+    <div class="recent-card">
+      <div class="section-head">
+        <div class="section-title">最近紀錄</div>
+        <button onclick="clearLog()" style="font-size:0.72rem;color:var(--ink3);cursor:pointer;background:none;border:none;font-family:var(--mono)">清除</button>
+      </div>
+      <div id="taskLogList">
+        <div class="task-log-empty">還沒有紀錄。完成第一輪後就會顯示在這裡。</div>
+      </div>
+    </div>
+
+    <!-- Weekly Chart -->
+    <div class="weekly-card">
+      <div class="section-head">
+        <div class="section-title">本週累積</div>
+      </div>
+      <div class="week-chart" id="weekChart"></div>
+    </div>
+
+    <!-- Insight -->
+    <div class="insight-card">
+      <div class="section-head">
+        <div class="section-title">成長洞察</div>
+      </div>
+      <div id="insightList">
+        <div class="insight-item">
+          <div class="insight-icon">🌱</div>
+          <div class="insight-text">每次打開這個頁面，都是你選擇開始的證明。</div>
         </div>
-
-        <!-- ══════════════════════════════
-       我是誰（佔位）
-  ══════════════════════════════ -->
-        <div class="page" id="page-identity">
-            <div class="coming-soon">
-                <div class="coming-soon-icon">🧭</div>
-                <span class="coming-soon-badge">即將推出</span>
-                <h3>我是誰？</h3>
-                <p>把你每天做的事連結到你想成為的那種人。從做一件事，變成成為某一種人。</p>
-            </div>
+        <div class="insight-item">
+          <div class="insight-icon">🔄</div>
+          <div class="insight-text">重新開始的次數，比從不停止更重要。</div>
         </div>
+      </div>
+    </div>
 
-    </div><!-- /app -->
+  </main>
+</div>
 
-    <script>
-        // =============================================
-        // 分頁切換
-        // =============================================
-        const tabs = document.querySelectorAll('.nav-tab');
-        const pages = document.querySelectorAll('.page');
+<script>
+/* ════════════════════════════════════
+   STATE
+════════════════════════════════════ */
+let currentState = null;   // exhausted / tired / neutral / energized
+let currentTask  = null;   // { title, duration, why }
+let goalText     = '';
 
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                const target = tab.dataset.page;
-                tabs.forEach(t => t.classList.remove('active'));
-                pages.forEach(p => p.classList.remove('active'));
-                tab.classList.add('active');
-                document.getElementById('page-' + target).classList.add('active');
-            });
-        });
+const POMODORO_URL = 'https://cplussssss.github.io/Focus/';
 
-        // =============================================
-        // 今日問診：心情選擇
-        // =============================================
-        let selectedMood = null;
-        let selectedEnergy = null;
+// localStorage keys
+const KEY_LOG     = 'ahn_log';
+const KEY_WEEKLY  = 'ahn_weekly';
 
-        document.querySelectorAll('.mood-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
-                btn.classList.add('selected');
-                selectedMood = btn.dataset.mood;
-                checkCheckinReady();
-            });
-        });
+/* ════════════════════════════════════
+   INIT
+════════════════════════════════════ */
+window.addEventListener('DOMContentLoaded', () => {
+  // today date
+  const d = new Date();
+  document.getElementById('todayDate').textContent =
+    `${d.getMonth()+1}/${d.getDate()} 今天`;
 
-        // =============================================
-        // 今日問診：電量選擇
-        // =============================================
-        document.querySelectorAll('.energy-dot').forEach(dot => {
-            dot.addEventListener('click', () => {
-                const level = parseInt(dot.dataset.level);
-                selectedEnergy = level;
-                document.querySelectorAll('.energy-dot').forEach((d, i) => {
-                    d.classList.toggle('filled', (i + 1) <= level);
-                });
-                checkCheckinReady();
-            });
-        });
+  renderLog();
+  renderWeekly();
+  updateStats();
+  renderInsight();
+});
 
-        function checkCheckinReady() {
-            const btn = document.getElementById('checkinBtn');
-            btn.disabled = !(selectedMood && selectedEnergy);
-        }
+/* ════════════════════════════════════
+   SCREEN SWITCHER
+════════════════════════════════════ */
+function showScreen(id) {
+  document.querySelectorAll('.left-screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
 
-        // =============================================
-        // 問診送出 → 呼叫 Claude API
-        // =============================================
-        document.getElementById('checkinBtn').addEventListener('click', async () => {
-            const btn = document.getElementById('checkinBtn');
-            const suggestionBox = document.getElementById('aiSuggestion');
-            const suggestionText = document.getElementById('aiSuggestionText');
+/* ════════════════════════════════════
+   STATE SELECT
+════════════════════════════════════ */
+function selectState(btn) {
+  document.querySelectorAll('.state-opt').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  currentState = btn.dataset.state;
+  const genBtn = document.getElementById('generateBtn');
+  genBtn.style.opacity = '1';
+  genBtn.style.pointerEvents = 'auto';
+}
 
-            btn.disabled = true;
-            btn.textContent = 'AI 分析中…';
-            suggestionBox.classList.remove('show');
+/* ════════════════════════════════════
+   GENERATE TASK via Claude API
+════════════════════════════════════ */
+async function generateTask(simplified = false) {
+  goalText = document.getElementById('goalInput')?.value?.trim() || '';
+  showScreen('screen-loading');
 
-            const prompt = `
-你是一個溫柔的 AI 習慣導航員，專門根據使用者當下的情緒與能量狀態，給出簡短、具體、低阻力的行動建議。
+  const stateMap = {
+    exhausted:  '非常疲憊，腦子轉不動，精力只剩 1/5',
+    tired:      '有點累，精力約 2-3/5，但想動一下',
+    neutral:    '狀態普通，精力 3/5，可以正常執行',
+    energized:  '精力充沛，狀態很好，精力 4-5/5'
+  };
 
-使用者今天的狀態：
-- 心情：${selectedMood}
-- 電量：${selectedEnergy} / 5
+  const simplifyNote = simplified
+    ? '（使用者說上一個任務太難了，請給更簡單、更短時間的版本）'
+    : '';
 
-請根據以上狀態，用繁體中文給出：
-1. 一句溫暖的回應（理解他的狀態，不責備）
-2. 一個適合現在開始的具體小任務建議（番茄鐘相關，考慮能量調整時間長短）
-3. 一句鼓勵的話
+  const prompt = `
+你是一個 AI 習慣導航員，專門幫助使用者克服啟動困難。
 
-格式：直接用段落寫，不要用條列式，不要加標題，控制在 80 字以內，語氣像朋友。
-    `.trim();
+使用者狀態：${stateMap[currentState] || '普通'}
+使用者想做：${goalText || '任何有幫助的事'}
+${simplifyNote}
 
-            try {
-                const res = await fetch('https://api.anthropic.com/v1/messages', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        model: 'claude-sonnet-4-20250514',
-                        max_tokens: 1000,
-                        messages: [{ role: 'user', content: prompt }]
-                    })
-                });
-                const data = await res.json();
-                const text = data.content?.[0]?.text || '抱歉，AI 暫時無法回應，請稍後再試。';
-                suggestionText.textContent = text;
-            } catch (e) {
-                suggestionText.textContent = '抱歉，無法連接 AI，請稍後再試。';
-            }
+請根據狀態，設計一個「現在馬上能開始的最小任務」。
 
-            suggestionBox.classList.add('show');
-            btn.textContent = '重新問診';
-            btn.disabled = false;
-        });
+規則：
+- 任務時間：疲憊→2分鐘，有點累→3分鐘，普通→5分鐘，有動力→10分鐘
+- 任務必須非常具體，不能是「讀書」，要是「打開書本翻到上次的頁面」
+- 語氣溫柔，不命令，像朋友建議
+- 不使用「你應該」
 
-        // =============================================
-        // 從 localStorage 讀取番茄鐘統計（番茄鐘儲存的 key）
-        // =============================================
-        function loadStats() {
-            try {
-                // 嘗試讀取番茄鐘存的紀錄
-                const raw = localStorage.getItem('pomodoroRecords');
-                if (!raw) return;
-                const records = JSON.parse(raw);
-                if (!Array.isArray(records)) return;
+請以 JSON 回覆，格式如下（只回 JSON，不要其他文字）：
+{
+  "duration": "3 分鐘",
+  "title": "任務名稱",
+  "why": "一句為什麼這樣設計的說明（給使用者看的，溫柔口吻）",
+  "note": "AI 給使用者的一句話（理解他的狀態，不責備，像朋友）",
+  "encouragement": "專注模式中顯示的鼓勵語（15字以內）"
+}
+`.trim();
 
-                const completed = records.filter(r => r.status === '已完成');
-                const totalMins = completed.reduce((sum, r) => sum + (r.actualMinutes || r.plannedMinutes || 0), 0);
-                const rate = records.length > 0 ? Math.round(completed.length / records.length * 100) : null;
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    let text = data.content?.[0]?.text || '';
+    // strip possible markdown fences
+    text = text.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(text);
+    currentTask = parsed;
+    showTaskScreen(parsed);
+  } catch(e) {
+    // fallback
+    const fallbacks = {
+      exhausted:  { duration:'2 分鐘', title:'打開你要做的東西，看一眼就好', why:'就算只是打開，也比什麼都沒做更好。', note:'你很累了，沒關係。2 分鐘，隨時可以停。', encouragement:'打開就是開始了' },
+      tired:      { duration:'3 分鐘', title:'把今天最重要的一件事寫下來', why:'寫下來能幫大腦卸下記憶的重量。', note:'有點累但還想動，這樣的你已經很好了。', encouragement:'寫下來，就輕了一點' },
+      neutral:    { duration:'5 分鐘', title:'把桌面清理一下，只留今天要用的東西', why:'清晰的環境能降低大腦的啟動阻力。', note:'普通的狀態也能做出好的開始。', encouragement:'環境清，心也清' },
+      energized:  { duration:'10 分鐘', title:'直接開始你最重要的任務，設 10 分鐘計時', why:'動力高的時候，先給大目標一個小開頭。', note:'你今天狀態很好！把這份能量用對地方。', encouragement:'現在最適合開始' },
+    };
+    currentTask = fallbacks[currentState] || fallbacks.neutral;
+    showTaskScreen(currentTask);
+  }
+}
 
-                // 計算連續天數
-                const days = [...new Set(records.map(r => r.timestamp?.slice(0, 10)))].sort();
-                let streak = 0;
-                if (days.length > 0) {
-                    const today = new Date().toISOString().slice(0, 10);
-                    let cur = new Date(today);
-                    for (let i = days.length - 1; i >= 0; i--) {
-                        const d = new Date(days[i]);
-                        const diff = Math.round((cur - d) / 86400000);
-                        if (diff === 0 || diff === 1) { streak++; cur = d; }
-                        else break;
-                    }
-                }
+function showTaskScreen(task) {
+  document.getElementById('taskDuration').textContent = task.duration;
+  document.getElementById('taskTitle').textContent = task.title;
+  document.getElementById('taskWhy').textContent = task.why || '';
+  document.getElementById('aiNote').innerHTML = `<strong>AI：</strong>${task.note}`;
+  showScreen('screen-task');
+}
 
-                document.getElementById('stat-sessions').innerHTML = `${completed.length} <span>輪</span>`;
-                document.getElementById('stat-minutes').innerHTML = `${totalMins} <span>分</span>`;
-                document.getElementById('stat-streak').innerHTML = `${streak} <span>天</span>`;
-                document.getElementById('stat-rate').innerHTML = rate !== null ? `${rate} <span>%</span>` : `— <span>%</span>`;
-            } catch (e) { }
-        }
+/* ════════════════════════════════════
+   SIMPLIFY
+════════════════════════════════════ */
+function simplifyTask() {
+  generateTask(true);
+}
 
-        loadStats();
-    </script>
+async function simplifyAndRestart() {
+  await generateTask(true);
+}
+
+/* ════════════════════════════════════
+   START FOCUS
+════════════════════════════════════ */
+function startFocus() {
+  if (!currentTask) return;
+  document.getElementById('focusTaskDisplay').textContent = currentTask.title;
+  document.getElementById('focusEncouragement').textContent =
+    currentTask.encouragement || '你可以的，先試試。';
+  // hide iframe if visible
+  hidePomodoro();
+  // hide right panel items while focusing (optional subtle dim)
+  showScreen('screen-focus');
+}
+
+/* ════════════════════════════════════
+   POMODORO IFRAME
+════════════════════════════════════ */
+function showPomodoro() {
+  const card = document.getElementById('focusIframeCard');
+  const frame = document.getElementById('pomodoroFrame');
+  if (frame.src === 'about:blank' || frame.src === '') {
+    frame.src = POMODORO_URL;
+  }
+  card.classList.add('show');
+  card.scrollIntoView({ behavior: 'smooth' });
+}
+
+function hidePomodoro() {
+  document.getElementById('focusIframeCard').classList.remove('show');
+}
+
+/* ════════════════════════════════════
+   COMPLETE
+════════════════════════════════════ */
+async function completeTask() {
+  // save to log
+  const entry = {
+    title: currentTask?.title || '專注一輪',
+    duration: currentTask?.duration || '—',
+    ts: new Date().toISOString(),
+    status: 'done'
+  };
+  saveLog(entry);
+  updateStats();
+  renderLog();
+  renderWeekly();
+  renderInsight();
+
+  // fetch completion message
+  let msg = '你完成了一輪專注。每一次開始，都是改變的積累。';
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{
+          role: 'user',
+          content: `使用者剛剛完成了這個任務：「${currentTask?.title}」。請給他一句簡短溫暖的完成回饋（繁體中文，40字以內，語氣像朋友，不要太誇張，不要用「太棒了」或「超讚」這類詞）。只回那一句話就好。`
+        }]
+      })
+    });
+    const data = await res.json();
+    msg = data.content?.[0]?.text || msg;
+  } catch(e) {}
+
+  document.getElementById('completionMsg').textContent = msg;
+  document.getElementById('completionOverlay').classList.add('show');
+  updateEncouragement();
+}
+
+function closeCompletion() {
+  document.getElementById('completionOverlay').classList.remove('show');
+  goBackToCheckin();
+}
+
+/* ════════════════════════════════════
+   RESET
+════════════════════════════════════ */
+function showReset() {
+  showScreen('screen-reset');
+}
+
+function goBackToCheckin() {
+  document.querySelectorAll('.state-opt').forEach(b => b.classList.remove('selected'));
+  currentState = null;
+  currentTask  = null;
+  document.getElementById('goalInput').value = '';
+  const genBtn = document.getElementById('generateBtn');
+  genBtn.style.opacity = '0.4';
+  genBtn.style.pointerEvents = 'none';
+  hidePomodoro();
+  showScreen('screen-checkin');
+}
+
+/* ════════════════════════════════════
+   ENCOURAGEMENT (right panel)
+════════════════════════════════════ */
+const encouragements = [
+  '打開這裡，就是一個開始。\n不需要完美，只需要一小步。',
+  '你已經做到最難的那一步了。\n開始，本來就不容易。',
+  '每一輪專注，都在累積屬於你的改變。',
+  '不是每天都有動力，但你還是打開了這裡。',
+];
+const identities = [
+  '每天都能重新開始的人',
+  '懂得照顧自己節奏的人',
+  '把小事做完的人',
+  '不放棄的人',
+];
+
+function updateEncouragement() {
+  const log = getLog();
+  const idx = log.length % encouragements.length;
+  document.getElementById('encText').textContent = encouragements[idx];
+  document.getElementById('identityWord').textContent = identities[idx % identities.length];
+}
+
+/* ════════════════════════════════════
+   LOG
+════════════════════════════════════ */
+function getLog() {
+  try { return JSON.parse(localStorage.getItem(KEY_LOG) || '[]'); }
+  catch(e) { return []; }
+}
+function saveLog(entry) {
+  const log = getLog();
+  log.unshift(entry);
+  localStorage.setItem(KEY_LOG, JSON.stringify(log.slice(0, 100)));
+}
+function clearLog() {
+  if (confirm('確定要清除所有紀錄？')) {
+    localStorage.removeItem(KEY_LOG);
+    localStorage.removeItem(KEY_WEEKLY);
+    renderLog(); updateStats(); renderWeekly(); renderInsight();
+  }
+}
+
+function renderLog() {
+  const log = getLog();
+  const el = document.getElementById('taskLogList');
+  if (log.length === 0) {
+    el.innerHTML = '<div class="task-log-empty">還沒有紀錄。完成第一輪後就會顯示在這裡。</div>';
+    return;
+  }
+  el.innerHTML = log.slice(0, 8).map(item => {
+    const d = new Date(item.ts);
+    const time = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    return `
+      <div class="task-log-item">
+        <div class="task-log-dot ${item.status === 'done' ? 'done' : 'skipped'}"></div>
+        <div class="task-log-content">
+          <div class="task-log-name">${item.title}</div>
+          <div class="task-log-meta">${time} · ${item.duration}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+/* ════════════════════════════════════
+   STATS
+════════════════════════════════════ */
+function updateStats() {
+  const log = getLog();
+  const today = new Date().toISOString().slice(0,10);
+  const todayLog = log.filter(l => l.ts.startsWith(today) && l.status === 'done');
+  const total    = log.filter(l => l.ts.startsWith(today));
+
+  const done = todayLog.length;
+  const mins = todayLog.reduce((s, l) => {
+    const m = parseInt(l.duration) || 0;
+    return s + m;
+  }, 0);
+  const rate = total.length > 0 ? Math.round(done / total.length * 100) : null;
+
+  document.getElementById('statDone').innerHTML = `${done}<small>輪</small>`;
+  document.getElementById('statMins').innerHTML = `${mins}<small>分</small>`;
+  document.getElementById('statRate').textContent = rate !== null ? `${rate}%` : '—';
+
+  const pct = Math.min(done / 4 * 100, 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = `${done} / 4`;
+}
+
+/* ════════════════════════════════════
+   WEEKLY CHART
+════════════════════════════════════ */
+function renderWeekly() {
+  const log = getLog();
+  const days = ['日','一','二','三','四','五','六'];
+  const today = new Date();
+  const todayDay = today.getDay();
+
+  const el = document.getElementById('weekChart');
+  el.innerHTML = '';
+
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    const key = d.toISOString().slice(0,10);
+    const count = log.filter(l => l.ts.startsWith(key) && l.status === 'done').length;
+    const isToday = i === 0;
+    const maxH = 68;
+    const h = count > 0 ? Math.max(10, Math.min(count * 14, maxH)) : 4;
+
+    const wrap = document.createElement('div');
+    wrap.className = 'week-bar-wrap';
+    wrap.innerHTML = `
+      <div class="week-bar ${isToday ? 'today' : (count > 0 ? 'has-data' : '')}"
+           style="height:${h}px" title="${count} 輪"></div>
+      <div class="week-day ${isToday ? 'today' : ''}">${days[d.getDay()]}</div>
+    `;
+    el.appendChild(wrap);
+  }
+}
+
+/* ════════════════════════════════════
+   INSIGHT
+════════════════════════════════════ */
+function renderInsight() {
+  const log = getLog();
+  const insights = [];
+
+  if (log.length === 0) {
+    insights.push({ icon: '🌱', text: '每次打開這個頁面，都是你選擇開始的證明。' });
+    insights.push({ icon: '🔄', text: '重新開始的次數，比從不停止更重要。' });
+  } else {
+    const done = log.filter(l => l.status === 'done').length;
+    insights.push({ icon: '✨', text: `你已經完成了 ${done} 輪專注。每一輪都算數。` });
+
+    const days = new Set(log.map(l => l.ts.slice(0,10))).size;
+    if (days >= 2) {
+      insights.push({ icon: '📅', text: `你已經連續 ${days} 天打開了這裡，這比你想的更難得。` });
+    } else {
+      insights.push({ icon: '🔄', text: '重新開始的勇氣，比從來不停更珍貴。' });
+    }
+
+    if (done >= 3) {
+      insights.push({ icon: '🧭', text: '你開始的次數越來越多了。這就是改變的樣子。' });
+    }
+  }
+
+  document.getElementById('insightList').innerHTML = insights.map(i => `
+    <div class="insight-item">
+      <div class="insight-icon">${i.icon}</div>
+      <div class="insight-text">${i.text}</div>
+    </div>
+  `).join('');
+}
+</script>
 </body>
-
 </html>
