@@ -1,1097 +1,1465 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
+
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>AI 習慣導航員</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;600;700&family=DM+Mono:wght@300;400;500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet"/>
-<style>
-/* ═══════════════════════════════════════
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI 習慣導航員</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;600;700&family=DM+Mono:wght@300;400;500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap"
+        rel="stylesheet" />
+    <style>
+        /* ═══════════════════════════════════════
    VARIABLES
 ═══════════════════════════════════════ */
-:root {
-  --bg:           #f0ede8;
-  --bg2:          #e8e4dd;
-  --surface:      #faf8f5;
-  --surface2:     #f3f0ea;
-  --border:       rgba(0,0,0,0.08);
-  --border2:      rgba(0,0,0,0.12);
-  --ink:          #1a1814;
-  --ink2:         #5a5650;
-  --ink3:         #9a9490;
-  --accent:       #c0522a;
-  --accent-bg:    rgba(192,82,42,0.08);
-  --accent-mid:   rgba(192,82,42,0.18);
-  --green:        #2e7d5c;
-  --green-bg:     rgba(46,125,92,0.08);
-  --blue:         #2c5f8a;
-  --blue-bg:      rgba(44,95,138,0.08);
-  --gold:         #a07830;
-  --gold-bg:      rgba(160,120,48,0.1);
+        :root {
+            --bg: #f0ede8;
+            --bg2: #e8e4dd;
+            --surface: #faf8f5;
+            --surface2: #f3f0ea;
+            --border: rgba(0, 0, 0, 0.08);
+            --border2: rgba(0, 0, 0, 0.12);
+            --ink: #1a1814;
+            --ink2: #5a5650;
+            --ink3: #9a9490;
+            --accent: #c0522a;
+            --accent-bg: rgba(192, 82, 42, 0.08);
+            --accent-mid: rgba(192, 82, 42, 0.18);
+            --green: #2e7d5c;
+            --green-bg: rgba(46, 125, 92, 0.08);
+            --blue: #2c5f8a;
+            --blue-bg: rgba(44, 95, 138, 0.08);
+            --gold: #a07830;
+            --gold-bg: rgba(160, 120, 48, 0.1);
 
-  --serif:   'Noto Serif TC', serif;
-  --mono:    'DM Mono', monospace;
-  --sans:    'DM Sans', sans-serif;
+            --serif: 'Noto Serif TC', serif;
+            --mono: 'DM Mono', monospace;
+            --sans: 'DM Sans', sans-serif;
 
-  --r-sm:  8px;
-  --r-md:  14px;
-  --r-lg:  20px;
-  --r-xl:  28px;
+            --r-sm: 8px;
+            --r-md: 14px;
+            --r-lg: 20px;
+            --r-xl: 28px;
 
-  --ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
+            --ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
 
-/* ═══════════════════════════════════════
+        /* ═══════════════════════════════════════
    RESET
 ═══════════════════════════════════════ */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { font-size: 15px; height: 100%; }
-body {
-  font-family: var(--sans);
-  background: var(--bg);
-  color: var(--ink);
-  height: 100%;
-  overflow: hidden;
-  line-height: 1.6;
-}
-button { font-family: var(--sans); cursor: pointer; border: none; background: none; }
-input, textarea { font-family: var(--sans); }
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-/* ═══════════════════════════════════════
-   APP SHELL  — left fixed / right scroll
+        html {
+            font-size: 15px;
+            height: 100%;
+        }
+
+        body {
+            font-family: var(--sans);
+            background: var(--bg);
+            color: var(--ink);
+            height: 100%;
+            overflow: hidden;
+            line-height: 1.6;
+        }
+
+        button {
+            font-family: var(--sans);
+            cursor: pointer;
+            border: none;
+            background: none;
+        }
+
+        input,
+        textarea {
+            font-family: var(--sans);
+        }
+
+        /* ═══════════════════════════════════════
+   APP SHELL  — LAYER 1 / LAYER 2
 ═══════════════════════════════════════ */
-.app {
-  display: grid;
-  grid-template-columns: 340px 1fr;
-  height: 100vh;
-  overflow: hidden;
-}
+        .app {
+            display: grid;
+            /* Layer 1: 初始狀態，左側全屏置中 */
+            grid-template-columns: 1fr;
+            height: 100vh;
+            overflow: hidden;
+            transition: grid-template-columns 0.5s var(--ease);
+        }
 
-/* LEFT PANEL */
-.left {
-  background: var(--surface);
-  border-right: 1px solid var(--border2);
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  overflow: hidden;
-  padding: 28px 24px;
-  gap: 0;
-  position: relative;
-}
+        /* Layer 2: 選完狀態後轉換成 40% / 60% */
+        .app.layer2 {
+            grid-template-columns: 40% 60%;
+        }
 
-/* RIGHT PANEL */
-.right {
-  overflow-y: auto;
-  overflow-x: hidden;
-  height: 100vh;
-  padding: 28px 32px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-.right::-webkit-scrollbar { width: 4px; }
-.right::-webkit-scrollbar-track { background: transparent; }
-.right::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+        /* LEFT PANEL */
+        .left {
+            background: var(--surface);
+            border-right: 1px solid var(--border2);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            padding: 28px 24px;
+            gap: 0;
+            position: relative;
+            /* Layer 1: 置中 */
+            align-items: center;
+            justify-content: center;
+            transition: all 0.5s var(--ease);
+        }
 
-/* ═══════════════════════════════════════
+        /* Layer 2: 左側回到正常佈局 */
+        .app.layer2 .left {
+            align-items: stretch;
+            justify-content: flex-start;
+            padding: 28px 24px;
+        }
+
+        /* RIGHT PANEL */
+        .right {
+            overflow-y: auto;
+            overflow-x: hidden;
+            height: 100vh;
+            padding: 28px 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            /* Layer 1: 隱藏 */
+            display: none;
+            transition: display 0.5s var(--ease);
+        }
+
+        /* Layer 2: 右側顯示 */
+        .app.layer2 .right {
+            display: flex;
+        }
+
+        .right::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .right::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .right::-webkit-scrollbar-thumb {
+            background: var(--border2);
+            border-radius: 2px;
+        }
+
+        /* ═══════════════════════════════════════
    LEFT — LOGO
 ═══════════════════════════════════════ */
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 28px;
-}
-.logo-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: var(--accent);
-  flex-shrink: 0;
-  box-shadow: 0 0 0 3px var(--accent-bg);
-}
-.logo-text {
-  font-family: var(--serif);
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--ink);
-  letter-spacing: 0.01em;
-}
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 28px;
+            /* Layer 1: 隱藏 */
+            display: none;
+        }
 
-/* ═══════════════════════════════════════
-   LEFT — SCREENS (state machine)
-═══════════════════════════════════════ */
-.left-screen { display: none; flex-direction: column; flex: 1; gap: 0; overflow: hidden; }
-.left-screen.active { display: flex; }
+        /* Layer 2: logo 顯示 */
+        .app.layer2 .logo {
+            display: flex;
+        }
 
-/* Screen: checkin */
-#screen-checkin {}
+        .logo-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+            flex-shrink: 0;
+            box-shadow: 0 0 0 3px var(--accent-bg);
+        }
 
-.screen-label {
-  font-family: var(--mono);
-  font-size: 0.65rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ink3);
-  margin-bottom: 12px;
-}
-.screen-question {
-  font-family: var(--serif);
-  font-size: 1.25rem;
-  font-weight: 600;
-  line-height: 1.4;
-  color: var(--ink);
-  margin-bottom: 20px;
-}
+        .logo-text {
+            font-family: var(--serif);
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--ink);
+            letter-spacing: 0.01em;
+        }
 
-.state-options {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 20px;
-}
-.state-opt {
-  padding: 13px 16px;
-  border-radius: var(--r-md);
-  border: 1.5px solid var(--border2);
-  background: transparent;
-  font-size: 0.88rem;
-  color: var(--ink2);
-  text-align: left;
-  transition: all 0.18s var(--ease);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.state-opt:hover {
-  border-color: var(--accent);
-  background: var(--accent-bg);
-  color: var(--ink);
-  transform: translateX(3px);
-}
-.state-opt.selected {
-  border-color: var(--accent);
-  background: var(--accent-bg);
-  color: var(--ink);
-}
-.state-opt .opt-emoji { font-size: 1.1rem; }
-.state-opt .opt-text { font-weight: 400; }
+        /* LEFT — SCREENS (state machine) */
+        .left-screen {
+            display: none;
+            flex-direction: column;
+            flex: 1;
+            gap: 0;
+            overflow: hidden;
+            /* Layer 1: 置中，大卡片 */
+            width: 100%;
+            max-width: 360px;
+            text-align: center;
+            align-items: center;
+            justify-content: center;
+        }
 
-/* goal input */
-.goal-input-wrap {
-  margin-bottom: 16px;
-}
-.goal-input-wrap label {
-  display: block;
-  font-size: 0.75rem;
-  color: var(--ink3);
-  margin-bottom: 6px;
-  font-family: var(--mono);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-.goal-input {
-  width: 100%;
-  padding: 11px 14px;
-  border-radius: var(--r-sm);
-  border: 1.5px solid var(--border2);
-  background: var(--bg);
-  font-size: 0.88rem;
-  color: var(--ink);
-  outline: none;
-  transition: border-color 0.15s;
-}
-.goal-input:focus { border-color: var(--accent); }
-.goal-input::placeholder { color: var(--ink3); }
+        .left-screen.active {
+            display: flex;
+        }
 
-/* ═══════════════════════════════════════
+        /* Layer 2: 左側屏幕回到正常流 */
+        .app.layer2 .left-screen {
+            max-width: none;
+            text-align: left;
+            align-items: stretch;
+            justify-content: flex-start;
+        }
+
+        /* Screen: checkin - Layer 1 置中卡片 */
+        #screen-checkin {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: var(--r-xl);
+            padding: 48px 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+            animation: scaleInCenter 0.5s var(--ease) both;
+        }
+
+        @keyframes scaleInCenter {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Layer 2: checkin 移回左側 */
+        .app.layer2 #screen-checkin {
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            padding: 0;
+            box-shadow: none;
+            animation: none;
+        }
+
+        .screen-label {
+            font-family: var(--mono);
+            font-size: 0.65rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--ink3);
+            margin-bottom: 12px;
+            /* Layer 1: 居中 */
+            text-align: center;
+        }
+
+        /* Layer 2: 左對齐 */
+        .app.layer2 .screen-label {
+            text-align: left;
+        }
+
+        .screen-question {
+            font-family: var(--serif);
+            font-size: 1.25rem;
+            font-weight: 600;
+            line-height: 1.4;
+            color: var(--ink);
+            margin-bottom: 20px;
+            /* Layer 1: 置中，更大字體 */
+            text-align: center;
+            font-size: 1.8rem;
+        }
+
+        /* Layer 2: 左對齐，回到正常大小 */
+        .app.layer2 .screen-question {
+            text-align: left;
+            font-size: 1.25rem;
+        }
+
+        .state-options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 20px;
+            /* Layer 1: 寬度受限 */
+            width: 100%;
+        }
+
+        /* Layer 2: 恢復正常 */
+        .app.layer2 .state-options {
+            width: 100%;
+        }
+
+        .state-opt {
+            padding: 13px 16px;
+            border-radius: var(--r-md);
+            border: 1.5px solid var(--border2);
+            background: transparent;
+            font-size: 0.88rem;
+            color: var(--ink2);
+            text-align: left;
+            transition: all 0.3s var(--ease);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            /* Layer 1: 大卡片 */
+            padding: 24px 20px;
+            border-radius: var(--r-lg);
+            font-size: 1rem;
+            text-align: center;
+        }
+
+        /* Layer 2: 回到原來的樣式 */
+        .app.layer2 .state-opt {
+            padding: 13px 16px;
+            border-radius: var(--r-md);
+            font-size: 0.88rem;
+            text-align: left;
+            flex-direction: row;
+            justify-content: flex-start;
+        }
+
+        .state-opt:hover {
+            border-color: var(--accent);
+            background: var(--accent-bg);
+            color: var(--ink);
+            transform: translateY(-2px);
+        }
+
+        /* Layer 2: 回到原來的hover效果 */
+        .app.layer2 .state-opt:hover {
+            transform: translateX(3px);
+        }
+
+        .state-opt.selected {
+            border-color: var(--accent);
+            background: var(--accent-bg);
+            color: var(--ink);
+        }
+
+        .state-opt .opt-emoji {
+            font-size: 1.1rem;
+            /* Layer 1: 更大 */
+            font-size: 2.5rem;
+        }
+
+        /* Layer 2: 回到原來的大小 */
+        .app.layer2 .state-opt .opt-emoji {
+            font-size: 1.1rem;
+        }
+
+        .state-opt .opt-text {
+            font-weight: 400;
+            /* Layer 1: 更大 */
+            font-size: 1.1rem;
+        }
+
+        /* Layer 2: 回到原來的大小 */
+        .app.layer2 .state-opt .opt-text {
+            font-size: 0.88rem;
+        }
+
+        /* goal input */
+        .goal-input-wrap {
+            margin-bottom: 16px;
+            /* Layer 1: 隱藏 */
+            display: none;
+        }
+
+        /* Layer 2: 顯示 */
+        .app.layer2 .goal-input-wrap {
+            display: block;
+        }
+
+        .goal-input-wrap label {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--ink3);
+            margin-bottom: 6px;
+            font-family: var(--mono);
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .goal-input {
+            width: 100%;
+            padding: 11px 14px;
+            border-radius: var(--r-sm);
+            border: 1.5px solid var(--border2);
+            background: var(--bg);
+            font-size: 0.88rem;
+            color: var(--ink);
+            outline: none;
+            transition: border-color 0.15s;
+        }
+
+        .goal-input:focus {
+            border-color: var(--accent);
+        }
+
+        .goal-input::placeholder {
+            color: var(--ink3);
+        }
+
+        /* ═══════════════════════════════════════
    LEFT — TASK CARD
 ═══════════════════════════════════════ */
-#screen-task {
-  animation: slideIn 0.35s var(--ease) both;
-}
-@keyframes slideIn {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
+        #screen-task {
+            animation: slideIn 0.35s var(--ease) both;
+        }
 
-.task-card {
-  background: var(--bg);
-  border: 1.5px solid var(--border2);
-  border-radius: var(--r-lg);
-  padding: 20px;
-  margin-bottom: 16px;
-  position: relative;
-  overflow: hidden;
-}
-.task-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0;
-  width: 3px; height: 100%;
-  background: var(--accent);
-  border-radius: 0 2px 2px 0;
-}
-.task-duration {
-  font-family: var(--mono);
-  font-size: 0.65rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 8px;
-}
-.task-title {
-  font-family: var(--serif);
-  font-size: 1rem;
-  font-weight: 600;
-  line-height: 1.45;
-  color: var(--ink);
-  margin-bottom: 10px;
-}
-.task-why {
-  font-size: 0.8rem;
-  color: var(--ink2);
-  line-height: 1.55;
-  font-style: italic;
-}
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
 
-.ai-note {
-  background: var(--accent-bg);
-  border-radius: var(--r-sm);
-  padding: 12px 14px;
-  font-size: 0.82rem;
-  color: var(--ink2);
-  line-height: 1.6;
-  margin-bottom: 20px;
-  border-left: 2px solid var(--accent);
-}
-.ai-note strong { color: var(--accent); font-weight: 500; }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-.left-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: auto;
-  padding-top: 16px;
-}
+        .task-card {
+            background: var(--bg);
+            border: 1.5px solid var(--border2);
+            border-radius: var(--r-lg);
+            padding: 20px;
+            margin-bottom: 16px;
+            position: relative;
+            overflow: hidden;
+        }
 
-.btn-primary {
-  padding: 14px;
-  border-radius: var(--r-md);
-  background: var(--ink);
-  color: var(--surface);
-  font-size: 0.9rem;
-  font-weight: 500;
-  letter-spacing: 0.01em;
-  transition: all 0.18s var(--ease);
-  text-align: center;
-}
-.btn-primary:hover {
-  background: var(--accent);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(192,82,42,0.25);
-}
-.btn-secondary {
-  padding: 12px;
-  border-radius: var(--r-md);
-  background: transparent;
-  border: 1.5px solid var(--border2);
-  color: var(--ink2);
-  font-size: 0.84rem;
-  transition: all 0.15s;
-  text-align: center;
-}
-.btn-secondary:hover {
-  border-color: var(--ink2);
-  color: var(--ink);
-  background: var(--bg2);
-}
-.btn-reset {
-  padding: 11px;
-  border-radius: var(--r-md);
-  background: transparent;
-  color: var(--ink3);
-  font-size: 0.8rem;
-  text-align: center;
-  transition: color 0.15s;
-}
-.btn-reset:hover { color: var(--ink2); }
+        .task-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--accent);
+            border-radius: 0 2px 2px 0;
+        }
 
-/* ═══════════════════════════════════════
+        .task-duration {
+            font-family: var(--mono);
+            font-size: 0.65rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+
+        .task-title {
+            font-family: var(--serif);
+            font-size: 1rem;
+            font-weight: 600;
+            line-height: 1.45;
+            color: var(--ink);
+            margin-bottom: 10px;
+        }
+
+        .task-why {
+            font-size: 0.8rem;
+            color: var(--ink2);
+            line-height: 1.55;
+            font-style: italic;
+        }
+
+        .ai-note {
+            background: var(--accent-bg);
+            border-radius: var(--r-sm);
+            padding: 12px 14px;
+            font-size: 0.82rem;
+            color: var(--ink2);
+            line-height: 1.6;
+            margin-bottom: 20px;
+            border-left: 2px solid var(--accent);
+        }
+
+        .ai-note strong {
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        .left-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: auto;
+            padding-top: 16px;
+            /* Layer 1: 隱藏 */
+            display: none;
+        }
+
+        /* Layer 2: 顯示 */
+        .app.layer2 .left-actions {
+            display: flex;
+        }
+
+        .btn-primary {
+            padding: 14px;
+            border-radius: var(--r-md);
+            background: var(--ink);
+            color: var(--surface);
+            font-size: 0.9rem;
+            font-weight: 500;
+            letter-spacing: 0.01em;
+            transition: all 0.18s var(--ease);
+            text-align: center;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(192, 82, 42, 0.25);
+        }
+
+        .btn-secondary {
+            padding: 12px;
+            border-radius: var(--r-md);
+            background: transparent;
+            border: 1.5px solid var(--border2);
+            color: var(--ink2);
+            font-size: 0.84rem;
+            transition: all 0.15s;
+            text-align: center;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--ink2);
+            color: var(--ink);
+            background: var(--bg2);
+        }
+
+        .btn-reset {
+            padding: 11px;
+            border-radius: var(--r-md);
+            background: transparent;
+            color: var(--ink3);
+            font-size: 0.8rem;
+            text-align: center;
+            transition: color 0.15s;
+        }
+
+        .btn-reset:hover {
+            color: var(--ink2);
+        }
+
+        /* ═══════════════════════════════════════
    LEFT — FOCUS MODE
 ═══════════════════════════════════════ */
-#screen-focus {
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  gap: 20px;
-}
-.focus-only-label {
-  font-family: var(--mono);
-  font-size: 0.65rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--ink3);
-}
-.focus-task-display {
-  font-family: var(--serif);
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--ink);
-  line-height: 1.4;
-  padding: 0 12px;
-}
-.focus-encouragement {
-  font-size: 0.82rem;
-  color: var(--ink3);
-  font-style: italic;
-}
-.focus-done-btn {
-  width: 100%;
-  padding: 16px;
-  border-radius: var(--r-md);
-  background: var(--green);
-  color: white;
-  font-size: 0.92rem;
-  font-weight: 500;
-  margin-top: 8px;
-  transition: all 0.18s var(--ease);
-}
-.focus-done-btn:hover {
-  background: #226147;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(46,125,92,0.3);
-}
-.focus-quit-btn {
-  color: var(--ink3);
-  font-size: 0.8rem;
-  padding: 8px;
-  transition: color 0.15s;
-}
-.focus-quit-btn:hover { color: var(--ink2); }
+        #screen-focus {
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            gap: 20px;
+        }
 
-/* ═══════════════════════════════════════
+        .focus-only-label {
+            font-family: var(--mono);
+            font-size: 0.65rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--ink3);
+        }
+
+        .focus-task-display {
+            font-family: var(--serif);
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--ink);
+            line-height: 1.4;
+            padding: 0 12px;
+        }
+
+        .focus-encouragement {
+            font-size: 0.82rem;
+            color: var(--ink3);
+            font-style: italic;
+        }
+
+        .focus-done-btn {
+            width: 100%;
+            padding: 16px;
+            border-radius: var(--r-md);
+            background: var(--green);
+            color: white;
+            font-size: 0.92rem;
+            font-weight: 500;
+            margin-top: 8px;
+            transition: all 0.18s var(--ease);
+        }
+
+        .focus-done-btn:hover {
+            background: #226147;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(46, 125, 92, 0.3);
+        }
+
+        .focus-quit-btn {
+            color: var(--ink3);
+            font-size: 0.8rem;
+            padding: 8px;
+            transition: color 0.15s;
+        }
+
+        .focus-quit-btn:hover {
+            color: var(--ink2);
+        }
+
+        /* ═══════════════════════════════════════
    LEFT — RESET / GENTLE
 ═══════════════════════════════════════ */
-#screen-reset {
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  gap: 16px;
-}
-.reset-emoji { font-size: 2.4rem; }
-.reset-title {
-  font-family: var(--serif);
-  font-size: 1.15rem;
-  font-weight: 600;
-  color: var(--ink);
-}
-.reset-body {
-  font-size: 0.85rem;
-  color: var(--ink2);
-  line-height: 1.7;
-  padding: 0 8px;
-}
-.reset-actions { display: flex; flex-direction: column; gap: 8px; width: 100%; margin-top: 8px; }
+        #screen-reset {
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            gap: 16px;
+        }
 
-/* ═══════════════════════════════════════
+        .reset-emoji {
+            font-size: 2.4rem;
+        }
+
+        .reset-title {
+            font-family: var(--serif);
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: var(--ink);
+        }
+
+        .reset-body {
+            font-size: 0.85rem;
+            color: var(--ink2);
+            line-height: 1.7;
+            padding: 0 8px;
+        }
+
+        .reset-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+            margin-top: 8px;
+        }
+
+        /* ═══════════════════════════════════════
    LEFT — LOADING SPINNER
 ═══════════════════════════════════════ */
-#screen-loading {
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  text-align: center;
-}
-.loading-ring {
-  width: 40px; height: 40px;
-  border-radius: 50%;
-  border: 2px solid var(--border2);
-  border-top-color: var(--accent);
-  animation: spin 0.9s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-.loading-text {
-  font-size: 0.82rem;
-  color: var(--ink3);
-  font-family: var(--mono);
-}
+        #screen-loading {
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            text-align: center;
+        }
 
-/* ═══════════════════════════════════════
+        .loading-ring {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid var(--border2);
+            border-top-color: var(--accent);
+            animation: spin 0.9s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-text {
+            font-size: 0.82rem;
+            color: var(--ink3);
+            font-family: var(--mono);
+        }
+
+        /* ═══════════════════════════════════════
    RIGHT — SECTION HEADERS
 ═══════════════════════════════════════ */
-.section-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 14px;
-}
-.section-title {
-  font-family: var(--serif);
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--ink);
-}
-.section-sub {
-  font-size: 0.75rem;
-  color: var(--ink3);
-  font-family: var(--mono);
-}
+        .section-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
 
-/* ═══════════════════════════════════════
+        .section-title {
+            font-family: var(--serif);
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--ink);
+        }
+
+        .section-sub {
+            font-size: 0.75rem;
+            color: var(--ink3);
+            font-family: var(--mono);
+        }
+
+        /* ═══════════════════════════════════════
    RIGHT — PROGRESS
 ═══════════════════════════════════════ */
-.progress-card {
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  border-radius: var(--r-lg);
-  padding: 22px 24px;
-}
-.progress-stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-bottom: 20px;
-}
-.stat-item {}
-.stat-num {
-  font-family: var(--mono);
-  font-size: 1.6rem;
-  font-weight: 500;
-  color: var(--ink);
-  line-height: 1;
-  margin-bottom: 3px;
-}
-.stat-num small { font-size: 0.75rem; color: var(--ink3); margin-left: 2px; }
-.stat-lbl {
-  font-size: 0.72rem;
-  color: var(--ink3);
-}
+        .progress-card {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: var(--r-lg);
+            padding: 22px 24px;
+        }
 
-.progress-bar-label {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.75rem;
-  color: var(--ink3);
-  margin-bottom: 6px;
-}
-.progress-track {
-  height: 6px;
-  background: var(--bg2);
-  border-radius: 3px;
-  overflow: hidden;
-}
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--accent), #e07040);
-  border-radius: 3px;
-  transition: width 0.8s var(--ease);
-}
+        .progress-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
 
-/* ═══════════════════════════════════════
+        .stat-item {}
+
+        .stat-num {
+            font-family: var(--mono);
+            font-size: 1.6rem;
+            font-weight: 500;
+            color: var(--ink);
+            line-height: 1;
+            margin-bottom: 3px;
+        }
+
+        .stat-num small {
+            font-size: 0.75rem;
+            color: var(--ink3);
+            margin-left: 2px;
+        }
+
+        .stat-lbl {
+            font-size: 0.72rem;
+            color: var(--ink3);
+        }
+
+        .progress-bar-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--ink3);
+            margin-bottom: 6px;
+        }
+
+        .progress-track {
+            height: 6px;
+            background: var(--bg2);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), #e07040);
+            border-radius: 3px;
+            transition: width 0.8s var(--ease);
+        }
+
+        /* ═══════════════════════════════════════
    RIGHT — RECENT TASKS
 ═══════════════════════════════════════ */
-.recent-card {
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  border-radius: var(--r-lg);
-  padding: 20px 24px;
-}
-.task-log-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 11px 0;
-  border-bottom: 1px solid var(--border);
-}
-.task-log-item:last-child { border-bottom: none; }
-.task-log-dot {
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  margin-top: 6px;
-  flex-shrink: 0;
-}
-.task-log-dot.done { background: var(--green); }
-.task-log-dot.skipped { background: var(--ink3); }
-.task-log-content { flex: 1; }
-.task-log-name {
-  font-size: 0.85rem;
-  color: var(--ink);
-  margin-bottom: 2px;
-  font-weight: 400;
-}
-.task-log-meta {
-  font-family: var(--mono);
-  font-size: 0.67rem;
-  color: var(--ink3);
-}
-.task-log-empty {
-  text-align: center;
-  padding: 32px 0;
-  color: var(--ink3);
-  font-size: 0.82rem;
-}
+        .recent-card {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: var(--r-lg);
+            padding: 20px 24px;
+        }
 
-/* ═══════════════════════════════════════
+        .task-log-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 11px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .task-log-item:last-child {
+            border-bottom: none;
+        }
+
+        .task-log-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            margin-top: 6px;
+            flex-shrink: 0;
+        }
+
+        .task-log-dot.done {
+            background: var(--green);
+        }
+
+        .task-log-dot.skipped {
+            background: var(--ink3);
+        }
+
+        .task-log-content {
+            flex: 1;
+        }
+
+        .task-log-name {
+            font-size: 0.85rem;
+            color: var(--ink);
+            margin-bottom: 2px;
+            font-weight: 400;
+        }
+
+        .task-log-meta {
+            font-family: var(--mono);
+            font-size: 0.67rem;
+            color: var(--ink3);
+        }
+
+        .task-log-empty {
+            text-align: center;
+            padding: 32px 0;
+            color: var(--ink3);
+            font-size: 0.82rem;
+        }
+
+        /* ═══════════════════════════════════════
    RIGHT — AI ENCOURAGEMENT
 ═══════════════════════════════════════ */
-.encouragement-card {
-  background: linear-gradient(135deg, #fdf6f0 0%, #f5f0f8 100%);
-  border: 1px solid var(--border2);
-  border-radius: var(--r-lg);
-  padding: 22px 24px;
-  position: relative;
-  overflow: hidden;
-}
-.encouragement-card::after {
-  content: '✦';
-  position: absolute;
-  right: 20px; top: 16px;
-  font-size: 1.2rem;
-  color: var(--accent);
-  opacity: 0.3;
-}
-.enc-label {
-  font-family: var(--mono);
-  font-size: 0.63rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 10px;
-}
-.enc-text {
-  font-family: var(--serif);
-  font-size: 1rem;
-  font-weight: 400;
-  color: var(--ink);
-  line-height: 1.65;
-}
-.identity-line {
-  margin-top: 14px;
-  padding-top: 14px;
-  border-top: 1px solid var(--border);
-  font-size: 0.8rem;
-  color: var(--ink3);
-}
-.identity-line strong {
-  color: var(--green);
-  font-weight: 500;
-}
+        .encouragement-card {
+            background: linear-gradient(135deg, #fdf6f0 0%, #f5f0f8 100%);
+            border: 1px solid var(--border2);
+            border-radius: var(--r-lg);
+            padding: 22px 24px;
+            position: relative;
+            overflow: hidden;
+        }
 
-/* ═══════════════════════════════════════
+        .encouragement-card::after {
+            content: '✦';
+            position: absolute;
+            right: 20px;
+            top: 16px;
+            font-size: 1.2rem;
+            color: var(--accent);
+            opacity: 0.3;
+        }
+
+        .enc-label {
+            font-family: var(--mono);
+            font-size: 0.63rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 10px;
+        }
+
+        .enc-text {
+            font-family: var(--serif);
+            font-size: 1rem;
+            font-weight: 400;
+            color: var(--ink);
+            line-height: 1.65;
+        }
+
+        .identity-line {
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px solid var(--border);
+            font-size: 0.8rem;
+            color: var(--ink3);
+        }
+
+        .identity-line strong {
+            color: var(--green);
+            font-weight: 500;
+        }
+
+        /* ═══════════════════════════════════════
    RIGHT — WEEKLY CHART
 ═══════════════════════════════════════ */
-.weekly-card {
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  border-radius: var(--r-lg);
-  padding: 20px 24px;
-}
-.week-chart {
-  display: flex;
-  align-items: flex-end;
-  gap: 8px;
-  height: 80px;
-  margin-top: 8px;
-}
-.week-bar-wrap {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
-  height: 100%;
-  justify-content: flex-end;
-}
-.week-bar {
-  width: 100%;
-  border-radius: 4px 4px 0 0;
-  background: var(--border2);
-  transition: height 0.6s var(--ease), background 0.3s;
-  min-height: 4px;
-}
-.week-bar.today { background: var(--accent); }
-.week-bar.has-data { background: var(--accent-mid); }
-.week-day {
-  font-family: var(--mono);
-  font-size: 0.6rem;
-  color: var(--ink3);
-  text-transform: uppercase;
-}
-.week-day.today { color: var(--accent); font-weight: 700; }
+        .weekly-card {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: var(--r-lg);
+            padding: 20px 24px;
+        }
 
-/* ═══════════════════════════════════════
+        .week-chart {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            height: 80px;
+            margin-top: 8px;
+        }
+
+        .week-bar-wrap {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            height: 100%;
+            justify-content: flex-end;
+        }
+
+        .week-bar {
+            width: 100%;
+            border-radius: 4px 4px 0 0;
+            background: var(--border2);
+            transition: height 0.6s var(--ease), background 0.3s;
+            min-height: 4px;
+        }
+
+        .week-bar.today {
+            background: var(--accent);
+        }
+
+        .week-bar.has-data {
+            background: var(--accent-mid);
+        }
+
+        .week-day {
+            font-family: var(--mono);
+            font-size: 0.6rem;
+            color: var(--ink3);
+            text-transform: uppercase;
+        }
+
+        .week-day.today {
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        /* ═══════════════════════════════════════
    RIGHT — INSIGHT
 ═══════════════════════════════════════ */
-.insight-card {
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  border-radius: var(--r-lg);
-  padding: 20px 24px;
-}
-.insight-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--border);
-}
-.insight-item:last-child { border-bottom: none; }
-.insight-icon {
-  font-size: 1rem;
-  margin-top: 1px;
-  flex-shrink: 0;
-}
-.insight-text {
-  font-size: 0.83rem;
-  color: var(--ink2);
-  line-height: 1.55;
-}
+        .insight-card {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: var(--r-lg);
+            padding: 20px 24px;
+        }
 
-/* ═══════════════════════════════════════
+        .insight-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .insight-item:last-child {
+            border-bottom: none;
+        }
+
+        .insight-icon {
+            font-size: 1rem;
+            margin-top: 1px;
+            flex-shrink: 0;
+        }
+
+        .insight-text {
+            font-size: 0.83rem;
+            color: var(--ink2);
+            line-height: 1.55;
+        }
+
+        /* ═══════════════════════════════════════
    RIGHT — FOCUS TIMER (iframe)
 ═══════════════════════════════════════ */
-.focus-iframe-card {
-  display: none;
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  border-radius: var(--r-lg);
-  overflow: hidden;
-  flex-direction: column;
-}
-.focus-iframe-card.show { display: flex; }
-.focus-iframe-header {
-  padding: 14px 20px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.focus-iframe-dot {
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  background: var(--accent);
-  animation: pulse 2s infinite;
-}
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
-}
-.focus-iframe-label {
-  font-family: var(--mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink2);
-}
-.focus-iframe-card iframe {
-  width: 100%;
-  height: 700px;
-  border: none;
-  display: block;
-  background: #1a1a1e;
-}
+        .focus-iframe-card {
+            display: none;
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: var(--r-lg);
+            overflow: hidden;
+            flex-direction: column;
+        }
 
-/* ═══════════════════════════════════════
+        .focus-iframe-card.show {
+            display: flex;
+        }
+
+        .focus-iframe-header {
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .focus-iframe-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--accent);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.4;
+            }
+        }
+
+        .focus-iframe-label {
+            font-family: var(--mono);
+            font-size: 0.7rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--ink2);
+        }
+
+        .focus-iframe-card iframe {
+            width: 100%;
+            height: 700px;
+            border: none;
+            display: block;
+            background: #1a1a1e;
+        }
+
+        /* ═══════════════════════════════════════
    COMPLETION ANIMATION OVERLAY
 ═══════════════════════════════════════ */
-.completion-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(240,237,232,0.92);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 999;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s;
-  backdrop-filter: blur(4px);
-}
-.completion-overlay.show {
-  opacity: 1;
-  pointer-events: all;
-}
-.completion-inner {
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 14px;
-  animation: popIn 0.4s var(--ease) both;
-}
-@keyframes popIn {
-  from { transform: scale(0.85); opacity: 0; }
-  to   { transform: scale(1); opacity: 1; }
-}
-.completion-emoji { font-size: 3rem; }
-.completion-title {
-  font-family: var(--serif);
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: var(--ink);
-}
-.completion-msg {
-  font-size: 0.9rem;
-  color: var(--ink2);
-  max-width: 280px;
-  line-height: 1.65;
-}
-.completion-btn {
-  margin-top: 8px;
-  padding: 14px 32px;
-  border-radius: var(--r-md);
-  background: var(--ink);
-  color: var(--surface);
-  font-size: 0.88rem;
-  font-weight: 500;
-  cursor: pointer;
-  border: none;
-  transition: all 0.18s var(--ease);
-}
-.completion-btn:hover {
-  background: var(--green);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(46,125,92,0.3);
-}
+        .completion-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(240, 237, 232, 0.92);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            backdrop-filter: blur(4px);
+        }
 
-/* ═══════════════════════════════════════
+        .completion-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .completion-inner {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+            animation: popIn 0.4s var(--ease) both;
+        }
+
+        @keyframes popIn {
+            from {
+                transform: scale(0.85);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .completion-emoji {
+            font-size: 3rem;
+        }
+
+        .completion-title {
+            font-family: var(--serif);
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--ink);
+        }
+
+        .completion-msg {
+            font-size: 0.9rem;
+            color: var(--ink2);
+            max-width: 280px;
+            line-height: 1.65;
+        }
+
+        .completion-btn {
+            margin-top: 8px;
+            padding: 14px 32px;
+            border-radius: var(--r-md);
+            background: var(--ink);
+            color: var(--surface);
+            font-size: 0.88rem;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 0.18s var(--ease);
+        }
+
+        .completion-btn:hover {
+            background: var(--green);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(46, 125, 92, 0.3);
+        }
+
+        /* ═══════════════════════════════════════
    RESPONSIVE
 ═══════════════════════════════════════ */
-@media (max-width: 800px) {
-  body { overflow: auto; }
-  .app {
-    grid-template-columns: 1fr;
-    height: auto;
-    overflow: visible;
-  }
-  .left {
-    height: auto;
-    overflow: visible;
-    padding: 24px 20px;
-  }
-  .right {
-    height: auto;
-    overflow: visible;
-    padding: 20px;
-  }
-  .focus-iframe-card iframe { height: 600px; }
-}
-</style>
+        @media (max-width: 800px) {
+            body {
+                overflow: auto;
+            }
+
+            .app {
+                grid-template-columns: 1fr;
+                height: auto;
+                overflow: visible;
+            }
+
+            .left {
+                height: auto;
+                overflow: visible;
+                padding: 24px 20px;
+            }
+
+            .right {
+                height: auto;
+                overflow: visible;
+                padding: 20px;
+            }
+
+            .focus-iframe-card iframe {
+                height: 600px;
+            }
+        }
+    </style>
 </head>
+
 <body>
 
-<!-- ════════════════════════
+    <!-- ════════════════════════
      COMPLETION OVERLAY
 ════════════════════════ -->
-<div class="completion-overlay" id="completionOverlay">
-  <div class="completion-inner">
-    <div class="completion-emoji">🎉</div>
-    <div class="completion-title">你已經開始了</div>
-    <div class="completion-msg" id="completionMsg">你完成了一輪專注。每一次開始，都是改變的積累。</div>
-    <button class="completion-btn" onclick="closeCompletion()">繼續下一輪</button>
-  </div>
-</div>
+    <div class="completion-overlay" id="completionOverlay">
+        <div class="completion-inner">
+            <div class="completion-emoji">🎉</div>
+            <div class="completion-title">你已經開始了</div>
+            <div class="completion-msg" id="completionMsg">你完成了一輪專注。每一次開始，都是改變的積累。</div>
+            <button class="completion-btn" onclick="closeCompletion()">繼續下一輪</button>
+        </div>
+    </div>
 
-<!-- ════════════════════════
+    <!-- ════════════════════════
      APP
 ════════════════════════ -->
-<div class="app">
+    <div class="app">
 
-  <!-- ══════ LEFT PANEL ══════ -->
-  <aside class="left">
+        <!-- ══════ LEFT PANEL ══════ -->
+        <aside class="left">
 
-    <!-- Logo -->
-    <div class="logo">
-      <div class="logo-dot"></div>
-      <div class="logo-text">AI 習慣導航員</div>
-      <button onclick="manageApiKey()" title="設置 API 密鑰" style="margin-left:auto;background:none;border:none;cursor:pointer;font-size:0.8rem;color:var(--ink3);padding:4px;transition:color 0.15s">⚙️</button>
+            <!-- Logo -->
+            <div class="logo">
+                <div class="logo-dot"></div>
+                <div class="logo-text">AI 習慣導航員</div>
+                <button onclick="manageApiKey()" title="設置 API 密鑰"
+                    style="margin-left:auto;background:none;border:none;cursor:pointer;font-size:0.8rem;color:var(--ink3);padding:4px;transition:color 0.15s">⚙️</button>
+            </div>
+
+            <!-- SCREEN: CHECKIN -->
+            <div class="left-screen active" id="screen-checkin">
+                <div class="screen-label">今日狀態</div>
+                <div class="screen-question">你現在的狀態是？</div>
+
+                <div class="state-options">
+                    <button class="state-opt" data-state="exhausted" onclick="selectState(this)">
+                        <span class="opt-emoji">😴</span>
+                        <span class="opt-text">很累，腦子轉不動</span>
+                    </button>
+                    <button class="state-opt" data-state="tired" onclick="selectState(this)">
+                        <span class="opt-emoji">😮‍💨</span>
+                        <span class="opt-text">有點累，但想動一下</span>
+                    </button>
+                    <button class="state-opt" data-state="neutral" onclick="selectState(this)">
+                        <span class="opt-emoji">😌</span>
+                        <span class="opt-text">普通，可以開始</span>
+                    </button>
+                    <button class="state-opt" data-state="energized" onclick="selectState(this)">
+                        <span class="opt-emoji">⚡</span>
+                        <span class="opt-text">有動力，想做點事</span>
+                    </button>
+                </div>
+
+                <div class="goal-input-wrap">
+                    <label>想做什麼事？（選填）</label>
+                    <input class="goal-input" id="goalInput" type="text" placeholder="例：讀書、運動、寫報告…" />
+                </div>
+
+                <div style="margin-top:auto">
+                    <button class="btn-primary" id="generateBtn" onclick="generateTask()"
+                        style="opacity:0.4;pointer-events:none;width:100%">
+                        幫我生成今天的第一步 →
+                    </button>
+                </div>
+            </div>
+
+            <!-- SCREEN: LOADING -->
+            <div class="left-screen" id="screen-loading">
+                <div class="loading-ring"></div>
+                <div class="loading-text">AI 正在分析你的狀態…</div>
+            </div>
+
+            <!-- SCREEN: TASK -->
+            <div class="left-screen" id="screen-task">
+                <div class="screen-label">你的第一步</div>
+
+                <div class="task-card">
+                    <div class="task-duration" id="taskDuration">3 分鐘</div>
+                    <div class="task-title" id="taskTitle">任務載入中…</div>
+                    <div class="task-why" id="taskWhy"></div>
+                </div>
+
+                <div class="ai-note" id="aiNote">AI 分析中…</div>
+
+                <div class="left-actions">
+                    <button class="btn-primary" onclick="startFocus()">開始專注 →</button>
+                    <button class="btn-secondary" onclick="showPomodoro()">用番茄鐘計時</button>
+                    <button class="btn-secondary" onclick="simplifyTask()">這個還是太難了</button>
+                    <button class="btn-reset" onclick="showReset()">中斷，重新開始</button>
+                </div>
+            </div>
+
+            <!-- SCREEN: FOCUS -->
+            <div class="left-screen" id="screen-focus">
+                <div class="focus-only-label">專注模式</div>
+                <div style="font-family:var(--mono);font-size:0.7rem;color:var(--ink3)">只做這一件事</div>
+                <div class="focus-task-display" id="focusTaskDisplay">任務</div>
+                <div class="focus-encouragement" id="focusEncouragement">你可以的，先試 3 分鐘。</div>
+                <button class="focus-done-btn" onclick="completeTask()">✓ 完成了！</button>
+                <button class="focus-quit-btn" onclick="showReset()">沒做完，重新開始</button>
+            </div>
+
+            <!-- SCREEN: RESET -->
+            <div class="left-screen" id="screen-reset">
+                <div class="reset-emoji">🤍</div>
+                <div class="reset-title">沒關係，我們重新開始</div>
+                <div class="reset-body">
+                    中斷不代表失敗。<br>
+                    大腦只是需要一個更小的入口。
+                </div>
+                <div class="reset-actions">
+                    <button class="btn-primary" onclick="simplifyAndRestart()" style="width:100%">給我更簡單的版本</button>
+                    <button class="btn-secondary" onclick="goBackToCheckin()" style="width:100%">重新選擇今日狀態</button>
+                </div>
+            </div>
+
+        </aside>
+
+        <!-- ══════ RIGHT PANEL ══════ -->
+        <main class="right">
+
+            <!-- iframe 番茄鐘（平時隱藏，點「用番茄鐘計時」才出現） -->
+            <div class="focus-iframe-card" id="focusIframeCard">
+                <div class="focus-iframe-header">
+                    <div class="focus-iframe-dot"></div>
+                    <div class="focus-iframe-label">番茄鐘 · 正在計時</div>
+                    <button onclick="hidePomodoro()"
+                        style="margin-left:auto;font-size:0.75rem;color:var(--ink3);cursor:pointer;background:none;border:none;font-family:var(--sans)">收起</button>
+                </div>
+                <iframe id="pomodoroFrame" src="about:blank" title="番茄鐘"></iframe>
+            </div>
+
+            <!-- Progress -->
+            <div class="progress-card">
+                <div class="section-head">
+                    <div class="section-title">今日進度</div>
+                    <div class="section-sub" id="todayDate">—</div>
+                </div>
+                <div class="progress-stats">
+                    <div class="stat-item">
+                        <div class="stat-num" id="statDone">0<small>輪</small></div>
+                        <div class="stat-lbl">已完成</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-num" id="statMins">0<small>分</small></div>
+                        <div class="stat-lbl">專注時間</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-num" id="statRate">—</div>
+                        <div class="stat-lbl">完成率</div>
+                    </div>
+                </div>
+                <div class="progress-bar-label">
+                    <span>今日目標：4 輪</span>
+                    <span id="progressLabel">0 / 4</span>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill" id="progressFill" style="width:0%"></div>
+                </div>
+            </div>
+
+            <!-- AI Encouragement -->
+            <div class="encouragement-card">
+                <div class="enc-label">✦ AI 陪伴</div>
+                <div class="enc-text" id="encText">
+                    打開這裡，就是一個開始。<br>不需要完美，只需要一小步。
+                </div>
+                <div class="identity-line" id="identityLine">
+                    你正在成為一個 <strong id="identityWord">願意開始的人</strong>
+                </div>
+            </div>
+
+            <!-- Recent Tasks -->
+            <div class="recent-card">
+                <div class="section-head">
+                    <div class="section-title">最近紀錄</div>
+                    <button onclick="clearLog()"
+                        style="font-size:0.72rem;color:var(--ink3);cursor:pointer;background:none;border:none;font-family:var(--mono)">清除</button>
+                </div>
+                <div id="taskLogList">
+                    <div class="task-log-empty">還沒有紀錄。完成第一輪後就會顯示在這裡。</div>
+                </div>
+            </div>
+
+            <!-- Weekly Chart -->
+            <div class="weekly-card">
+                <div class="section-head">
+                    <div class="section-title">本週累積</div>
+                </div>
+                <div class="week-chart" id="weekChart"></div>
+            </div>
+
+            <!-- Insight -->
+            <div class="insight-card">
+                <div class="section-head">
+                    <div class="section-title">成長洞察</div>
+                </div>
+                <div id="insightList">
+                    <div class="insight-item">
+                        <div class="insight-icon">🌱</div>
+                        <div class="insight-text">每次打開這個頁面，都是你選擇開始的證明。</div>
+                    </div>
+                    <div class="insight-item">
+                        <div class="insight-icon">🔄</div>
+                        <div class="insight-text">重新開始的次數，比從不停止更重要。</div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
     </div>
 
-    <!-- SCREEN: CHECKIN -->
-    <div class="left-screen active" id="screen-checkin">
-      <div class="screen-label">今日狀態</div>
-      <div class="screen-question">你現在的狀態是？</div>
+    <script>
+        /* ════════════════════════════════════
+           STATE
+        ════════════════════════════════════ */
+        let currentState = null;   // exhausted / tired / neutral / energized
+        let currentTask = null;   // { title, duration, why }
+        let goalText = '';
 
-      <div class="state-options">
-        <button class="state-opt" data-state="exhausted" onclick="selectState(this)">
-          <span class="opt-emoji">😴</span>
-          <span class="opt-text">很累，腦子轉不動</span>
-        </button>
-        <button class="state-opt" data-state="tired" onclick="selectState(this)">
-          <span class="opt-emoji">😮‍💨</span>
-          <span class="opt-text">有點累，但想動一下</span>
-        </button>
-        <button class="state-opt" data-state="neutral" onclick="selectState(this)">
-          <span class="opt-emoji">😌</span>
-          <span class="opt-text">普通，可以開始</span>
-        </button>
-        <button class="state-opt" data-state="energized" onclick="selectState(this)">
-          <span class="opt-emoji">⚡</span>
-          <span class="opt-text">有動力，想做點事</span>
-        </button>
-      </div>
+        const POMODORO_URL = 'https://cplussssss.github.io/Focus/';
 
-      <div class="goal-input-wrap">
-        <label>想做什麼事？（選填）</label>
-        <input class="goal-input" id="goalInput" type="text" placeholder="例：讀書、運動、寫報告…"/>
-      </div>
+        // localStorage keys
+        const KEY_LOG = 'ahn_log';
+        const KEY_WEEKLY = 'ahn_weekly';
 
-      <div style="margin-top:auto">
-        <button class="btn-primary" id="generateBtn" onclick="generateTask()" style="opacity:0.4;pointer-events:none;width:100%">
-          幫我生成今天的第一步 →
-        </button>
-      </div>
-    </div>
+        /* ════════════════════════════════════
+           INIT
+        ════════════════════════════════════ */
+        window.addEventListener('DOMContentLoaded', () => {
+            // today date
+            const d = new Date();
+            document.getElementById('todayDate').textContent =
+                `${d.getMonth() + 1}/${d.getDate()} 今天`;
 
-    <!-- SCREEN: LOADING -->
-    <div class="left-screen" id="screen-loading">
-      <div class="loading-ring"></div>
-      <div class="loading-text">AI 正在分析你的狀態…</div>
-    </div>
+            renderLog();
+            renderWeekly();
+            updateStats();
+            renderInsight();
 
-    <!-- SCREEN: TASK -->
-    <div class="left-screen" id="screen-task">
-      <div class="screen-label">你的第一步</div>
+            // 檢查是否有 API Key
+            const hasKey = !!localStorage.getItem('anthropic_api_key');
+            if (!hasKey) {
+                console.log('💡 提示：設置 API 密鑰以使用 AI 任務生成功能');
+            }
+        });
 
-      <div class="task-card">
-        <div class="task-duration" id="taskDuration">3 分鐘</div>
-        <div class="task-title" id="taskTitle">任務載入中…</div>
-        <div class="task-why" id="taskWhy"></div>
-      </div>
+        function manageApiKey() {
+            const current = localStorage.getItem('anthropic_api_key') || '';
+            const newKey = prompt(
+                `🔑 Anthropic API 密鑰管理\n\n` +
+                `當前狀態：${current ? '✅ 已設置' : '❌ 未設置'}\n\n` +
+                `在此貼上你的 API Key\n(從 https://console.anthropic.com 獲取)\n\n` +
+                `• 只會存在你的瀏覽器本地\n` +
+                `• 永遠不會上傳到任何伺服器\n` +
+                `• 要清除，留空後按確定\n\n` +
+                `API Key:`,
+                current
+            );
 
-      <div class="ai-note" id="aiNote">AI 分析中…</div>
+            if (newKey !== null) {
+                if (newKey.trim()) {
+                    localStorage.setItem('anthropic_api_key', newKey.trim());
+                    alert('✅ API 密鑰已保存！\n\n下次使用時將自動調用 AI 任務生成。');
+                } else {
+                    localStorage.removeItem('anthropic_api_key');
+                    alert('🗑️ API 密鑰已清除');
+                }
+            }
+        }
 
-      <div class="left-actions">
-        <button class="btn-primary" onclick="startFocus()">開始專注 →</button>
-        <button class="btn-secondary" onclick="showPomodoro()">用番茄鐘計時</button>
-        <button class="btn-secondary" onclick="simplifyTask()">這個還是太難了</button>
-        <button class="btn-reset" onclick="showReset()">中斷，重新開始</button>
-      </div>
-    </div>
+        /* ════════════════════════════════════
+           SCREEN SWITCHER
+        ════════════════════════════════════ */
+        function showScreen(id) {
+            document.querySelectorAll('.left-screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
 
-    <!-- SCREEN: FOCUS -->
-    <div class="left-screen" id="screen-focus">
-      <div class="focus-only-label">專注模式</div>
-      <div style="font-family:var(--mono);font-size:0.7rem;color:var(--ink3)">只做這一件事</div>
-      <div class="focus-task-display" id="focusTaskDisplay">任務</div>
-      <div class="focus-encouragement" id="focusEncouragement">你可以的，先試 3 分鐘。</div>
-      <button class="focus-done-btn" onclick="completeTask()">✓ 完成了！</button>
-      <button class="focus-quit-btn" onclick="showReset()">沒做完，重新開始</button>
-    </div>
+        /* ════════════════════════════════════
+           STATE SELECT
+        ════════════════════════════════════ */
+        function selectState(btn) {
+            document.querySelectorAll('.state-opt').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            currentState = btn.dataset.state;
 
-    <!-- SCREEN: RESET -->
-    <div class="left-screen" id="screen-reset">
-      <div class="reset-emoji">🤍</div>
-      <div class="reset-title">沒關係，我們重新開始</div>
-      <div class="reset-body">
-        中斷不代表失敗。<br>
-        大腦只是需要一個更小的入口。
-      </div>
-      <div class="reset-actions">
-        <button class="btn-primary" onclick="simplifyAndRestart()" style="width:100%">給我更簡單的版本</button>
-        <button class="btn-secondary" onclick="goBackToCheckin()" style="width:100%">重新選擇今日狀態</button>
-      </div>
-    </div>
+            // 觸發 Layer 2 轉場
+            document.querySelector('.app').classList.add('layer2');
 
-  </aside>
+            const genBtn = document.getElementById('generateBtn');
+            genBtn.style.opacity = '1';
+            genBtn.style.pointerEvents = 'auto';
+        }
 
-  <!-- ══════ RIGHT PANEL ══════ -->
-  <main class="right">
+        /* ════════════════════════════════════
+           GENERATE TASK via Claude API
+        ════════════════════════════════════ */
+        async function generateTask(simplified = false) {
+            goalText = document.getElementById('goalInput')?.value?.trim() || '';
+            showScreen('screen-loading');
 
-    <!-- iframe 番茄鐘（平時隱藏，點「用番茄鐘計時」才出現） -->
-    <div class="focus-iframe-card" id="focusIframeCard">
-      <div class="focus-iframe-header">
-        <div class="focus-iframe-dot"></div>
-        <div class="focus-iframe-label">番茄鐘 · 正在計時</div>
-        <button onclick="hidePomodoro()" style="margin-left:auto;font-size:0.75rem;color:var(--ink3);cursor:pointer;background:none;border:none;font-family:var(--sans)">收起</button>
-      </div>
-      <iframe
-        id="pomodoroFrame"
-        src="about:blank"
-        title="番茄鐘"
-      ></iframe>
-    </div>
+            const stateMap = {
+                exhausted: '非常疲憊，腦子轉不動，精力只剩 1/5',
+                tired: '有點累，精力約 2-3/5，但想動一下',
+                neutral: '狀態普通，精力 3/5，可以正常執行',
+                energized: '精力充沛，狀態很好，精力 4-5/5'
+            };
 
-    <!-- Progress -->
-    <div class="progress-card">
-      <div class="section-head">
-        <div class="section-title">今日進度</div>
-        <div class="section-sub" id="todayDate">—</div>
-      </div>
-      <div class="progress-stats">
-        <div class="stat-item">
-          <div class="stat-num" id="statDone">0<small>輪</small></div>
-          <div class="stat-lbl">已完成</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-num" id="statMins">0<small>分</small></div>
-          <div class="stat-lbl">專注時間</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-num" id="statRate">—</div>
-          <div class="stat-lbl">完成率</div>
-        </div>
-      </div>
-      <div class="progress-bar-label">
-        <span>今日目標：4 輪</span>
-        <span id="progressLabel">0 / 4</span>
-      </div>
-      <div class="progress-track">
-        <div class="progress-fill" id="progressFill" style="width:0%"></div>
-      </div>
-    </div>
+            const simplifyNote = simplified
+                ? '（使用者說上一個任務太難了，請給更簡單、更短時間的版本）'
+                : '';
 
-    <!-- AI Encouragement -->
-    <div class="encouragement-card">
-      <div class="enc-label">✦ AI 陪伴</div>
-      <div class="enc-text" id="encText">
-        打開這裡，就是一個開始。<br>不需要完美，只需要一小步。
-      </div>
-      <div class="identity-line" id="identityLine">
-        你正在成為一個 <strong id="identityWord">願意開始的人</strong>
-      </div>
-    </div>
-
-    <!-- Recent Tasks -->
-    <div class="recent-card">
-      <div class="section-head">
-        <div class="section-title">最近紀錄</div>
-        <button onclick="clearLog()" style="font-size:0.72rem;color:var(--ink3);cursor:pointer;background:none;border:none;font-family:var(--mono)">清除</button>
-      </div>
-      <div id="taskLogList">
-        <div class="task-log-empty">還沒有紀錄。完成第一輪後就會顯示在這裡。</div>
-      </div>
-    </div>
-
-    <!-- Weekly Chart -->
-    <div class="weekly-card">
-      <div class="section-head">
-        <div class="section-title">本週累積</div>
-      </div>
-      <div class="week-chart" id="weekChart"></div>
-    </div>
-
-    <!-- Insight -->
-    <div class="insight-card">
-      <div class="section-head">
-        <div class="section-title">成長洞察</div>
-      </div>
-      <div id="insightList">
-        <div class="insight-item">
-          <div class="insight-icon">🌱</div>
-          <div class="insight-text">每次打開這個頁面，都是你選擇開始的證明。</div>
-        </div>
-        <div class="insight-item">
-          <div class="insight-icon">🔄</div>
-          <div class="insight-text">重新開始的次數，比從不停止更重要。</div>
-        </div>
-      </div>
-    </div>
-
-  </main>
-</div>
-
-<script>
-/* ════════════════════════════════════
-   STATE
-════════════════════════════════════ */
-let currentState = null;   // exhausted / tired / neutral / energized
-let currentTask  = null;   // { title, duration, why }
-let goalText     = '';
-
-const POMODORO_URL = 'https://cplussssss.github.io/Focus/';
-
-// localStorage keys
-const KEY_LOG     = 'ahn_log';
-const KEY_WEEKLY  = 'ahn_weekly';
-
-/* ════════════════════════════════════
-   INIT
-════════════════════════════════════ */
-window.addEventListener('DOMContentLoaded', () => {
-  // today date
-  const d = new Date();
-  document.getElementById('todayDate').textContent =
-    `${d.getMonth()+1}/${d.getDate()} 今天`;
-
-  renderLog();
-  renderWeekly();
-  updateStats();
-  renderInsight();
-
-  // 檢查是否有 API Key
-  const hasKey = !!localStorage.getItem('anthropic_api_key');
-  if (!hasKey) {
-    console.log('💡 提示：設置 API 密鑰以使用 AI 任務生成功能');
-  }
-});
-
-function manageApiKey() {
-  const current = localStorage.getItem('anthropic_api_key') || '';
-  const newKey = prompt(
-    `🔑 Anthropic API 密鑰管理\n\n` +
-    `當前狀態：${current ? '✅ 已設置' : '❌ 未設置'}\n\n` +
-    `在此貼上你的 API Key\n(從 https://console.anthropic.com 獲取)\n\n` +
-    `• 只會存在你的瀏覽器本地\n` +
-    `• 永遠不會上傳到任何伺服器\n` +
-    `• 要清除，留空後按確定\n\n` +
-    `API Key:`,
-    current
-  );
-
-  if (newKey !== null) {
-    if (newKey.trim()) {
-      localStorage.setItem('anthropic_api_key', newKey.trim());
-      alert('✅ API 密鑰已保存！\n\n下次使用時將自動調用 AI 任務生成。');
-    } else {
-      localStorage.removeItem('anthropic_api_key');
-      alert('🗑️ API 密鑰已清除');
-    }
-  }
-}
-
-/* ════════════════════════════════════
-   SCREEN SWITCHER
-════════════════════════════════════ */
-function showScreen(id) {
-  document.querySelectorAll('.left-screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-
-/* ════════════════════════════════════
-   STATE SELECT
-════════════════════════════════════ */
-function selectState(btn) {
-  document.querySelectorAll('.state-opt').forEach(b => b.classList.remove('selected'));
-  btn.classList.add('selected');
-  currentState = btn.dataset.state;
-  const genBtn = document.getElementById('generateBtn');
-  genBtn.style.opacity = '1';
-  genBtn.style.pointerEvents = 'auto';
-}
-
-/* ════════════════════════════════════
-   GENERATE TASK via Claude API
-════════════════════════════════════ */
-async function generateTask(simplified = false) {
-  goalText = document.getElementById('goalInput')?.value?.trim() || '';
-  showScreen('screen-loading');
-
-  const stateMap = {
-    exhausted:  '非常疲憊，腦子轉不動，精力只剩 1/5',
-    tired:      '有點累，精力約 2-3/5，但想動一下',
-    neutral:    '狀態普通，精力 3/5，可以正常執行',
-    energized:  '精力充沛，狀態很好，精力 4-5/5'
-  };
-
-  const simplifyNote = simplified
-    ? '（使用者說上一個任務太難了，請給更簡單、更短時間的版本）'
-    : '';
-
-  const prompt = `
+            const prompt = `
 你是一個 AI 習慣導航員，專門幫助使用者克服啟動困難。
 
 使用者狀態：${stateMap[currentState] || '普通'}
@@ -1116,250 +1484,254 @@ ${simplifyNote}
 }
 `.trim();
 
-  const apiKey = localStorage.getItem('anthropic_api_key');
+            const apiKey = localStorage.getItem('anthropic_api_key');
 
-  if (!apiKey) {
-    // 沒有 API Key，使用 fallback
-    useFallbackTask();
-    // 延遲提示用戶
-    setTimeout(() => {
-      const msg = `💡 提示：要使用 AI 任務生成，請設置你的 API 密鑰\n\n` +
-                  `1. 點擊左上角 ⚙️ 按鈕\n` +
-                  `2. 在 https://console.anthropic.com 獲取你的 API Key\n` +
-                  `3. 貼上並保存\n\n` +
-                  `目前使用預設任務（仍然會根據你的狀態調整難度）`;
-      alert(msg);
-    }, 300);
-    return;
-  }
+            if (!apiKey) {
+                // 沒有 API Key，使用 fallback
+                useFallbackTask();
+                // 延遲提示用戶
+                setTimeout(() => {
+                    const msg = `💡 提示：要使用 AI 任務生成，請設置你的 API 密鑰\n\n` +
+                        `1. 點擊左上角 ⚙️ 按鈕\n` +
+                        `2. 在 https://console.anthropic.com 獲取你的 API Key\n` +
+                        `3. 貼上並保存\n\n` +
+                        `目前使用預設任務（仍然會根據你的狀態調整難度）`;
+                    alert(msg);
+                }, 300);
+                return;
+            }
 
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey
-      },
-      body: JSON.stringify({
-        model: 'claude-3-5-sonnet-20241022',
-        max_tokens: 1000,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
+            try {
+                const res = await fetch('https://api.anthropic.com/v1/messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': apiKey
+                    },
+                    body: JSON.stringify({
+                        model: 'claude-3-5-sonnet-20241022',
+                        max_tokens: 1000,
+                        messages: [{ role: 'user', content: prompt }]
+                    })
+                });
 
-    if (!res.ok) {
-      if (res.status === 401) {
-        alert('❌ API Key 無效或已過期\n\n請檢查你的 API Key 是否正確');
-        localStorage.removeItem('anthropic_api_key');
-      } else {
-        throw new Error(`API error: ${res.status} ${res.statusText}`);
-      }
-      useFallbackTask();
-      return;
-    }
+                if (!res.ok) {
+                    if (res.status === 401) {
+                        alert('❌ API Key 無效或已過期\n\n請檢查你的 API Key 是否正確');
+                        localStorage.removeItem('anthropic_api_key');
+                    } else {
+                        throw new Error(`API error: ${res.status} ${res.statusText}`);
+                    }
+                    useFallbackTask();
+                    return;
+                }
 
-    const data = await res.json();
-    let text = data.content?.[0]?.text || '';
-    text = text.replace(/```json|```/g, '').trim();
-    const parsed = JSON.parse(text);
-    currentTask = parsed;
-    showTaskScreen(parsed);
-  } catch(e) {
-    console.error('Task generation error:', e);
-    useFallbackTask();
-  }
+                const data = await res.json();
+                let text = data.content?.[0]?.text || '';
+                text = text.replace(/```json|```/g, '').trim();
+                const parsed = JSON.parse(text);
+                currentTask = parsed;
+                showTaskScreen(parsed);
+            } catch (e) {
+                console.error('Task generation error:', e);
+                useFallbackTask();
+            }
 
-  function useFallbackTask() {
-    const fallbacks = {
-      exhausted:  { duration:'2 分鐘', title:'打開你要做的東西，看一眼就好', why:'就算只是打開，也比什麼都沒做更好。', note:'你很累了，沒關係。2 分鐘，隨時可以停。', encouragement:'打開就是開始了' },
-      tired:      { duration:'3 分鐘', title:'把今天最重要的一件事寫下來', why:'寫下來能幫大腦卸下記憶的重量。', note:'有點累但還想動，這樣的你已經很好了。', encouragement:'寫下來，就輕了一點' },
-      neutral:    { duration:'5 分鐘', title:'把桌面清理一下，只留今天要用的東西', why:'清晰的環境能降低大腦的啟動阻力。', note:'普通的狀態也能做出好的開始。', encouragement:'環境清，心也清' },
-      energized:  { duration:'10 分鐘', title:'直接開始你最重要的任務，設 10 分鐘計時', why:'動力高的時候，先給大目標一個小開頭。', note:'你今天狀態很好！把這份能量用對地方。', encouragement:'現在最適合開始' },
-    };
-    currentTask = fallbacks[currentState] || fallbacks.neutral;
-    showTaskScreen(currentTask);
-  }
-}
+            function useFallbackTask() {
+                const fallbacks = {
+                    exhausted: { duration: '2 分鐘', title: '打開你要做的東西，看一眼就好', why: '就算只是打開，也比什麼都沒做更好。', note: '你很累了，沒關係。2 分鐘，隨時可以停。', encouragement: '打開就是開始了' },
+                    tired: { duration: '3 分鐘', title: '把今天最重要的一件事寫下來', why: '寫下來能幫大腦卸下記憶的重量。', note: '有點累但還想動，這樣的你已經很好了。', encouragement: '寫下來，就輕了一點' },
+                    neutral: { duration: '5 分鐘', title: '把桌面清理一下，只留今天要用的東西', why: '清晰的環境能降低大腦的啟動阻力。', note: '普通的狀態也能做出好的開始。', encouragement: '環境清，心也清' },
+                    energized: { duration: '10 分鐘', title: '直接開始你最重要的任務，設 10 分鐘計時', why: '動力高的時候，先給大目標一個小開頭。', note: '你今天狀態很好！把這份能量用對地方。', encouragement: '現在最適合開始' },
+                };
+                currentTask = fallbacks[currentState] || fallbacks.neutral;
+                showTaskScreen(currentTask);
+            }
+        }
 
-function showTaskScreen(task) {
-  document.getElementById('taskDuration').textContent = task.duration;
-  document.getElementById('taskTitle').textContent = task.title;
-  document.getElementById('taskWhy').textContent = task.why || '';
-  document.getElementById('aiNote').innerHTML = `<strong>AI：</strong>${task.note}`;
-  showScreen('screen-task');
-}
+        function showTaskScreen(task) {
+            document.getElementById('taskDuration').textContent = task.duration;
+            document.getElementById('taskTitle').textContent = task.title;
+            document.getElementById('taskWhy').textContent = task.why || '';
+            document.getElementById('aiNote').innerHTML = `<strong>AI：</strong>${task.note}`;
+            showScreen('screen-task');
+        }
 
-/* ════════════════════════════════════
-   SIMPLIFY
-════════════════════════════════════ */
-function simplifyTask() {
-  generateTask(true);
-}
+        /* ════════════════════════════════════
+           SIMPLIFY
+        ════════════════════════════════════ */
+        function simplifyTask() {
+            generateTask(true);
+        }
 
-async function simplifyAndRestart() {
-  await generateTask(true);
-}
+        async function simplifyAndRestart() {
+            await generateTask(true);
+        }
 
-/* ════════════════════════════════════
-   START FOCUS
-════════════════════════════════════ */
-function startFocus() {
-  if (!currentTask) return;
-  document.getElementById('focusTaskDisplay').textContent = currentTask.title;
-  document.getElementById('focusEncouragement').textContent =
-    currentTask.encouragement || '你可以的，先試試。';
-  // hide iframe if visible
-  hidePomodoro();
-  // hide right panel items while focusing (optional subtle dim)
-  showScreen('screen-focus');
-}
+        /* ════════════════════════════════════
+           START FOCUS
+        ════════════════════════════════════ */
+        function startFocus() {
+            if (!currentTask) return;
+            document.getElementById('focusTaskDisplay').textContent = currentTask.title;
+            document.getElementById('focusEncouragement').textContent =
+                currentTask.encouragement || '你可以的，先試試。';
+            // hide iframe if visible
+            hidePomodoro();
+            // hide right panel items while focusing (optional subtle dim)
+            showScreen('screen-focus');
+        }
 
-/* ════════════════════════════════════
-   POMODORO IFRAME
-════════════════════════════════════ */
-function showPomodoro() {
-  const card = document.getElementById('focusIframeCard');
-  const frame = document.getElementById('pomodoroFrame');
-  if (frame.src === 'about:blank' || frame.src === '') {
-    frame.src = POMODORO_URL;
-  }
-  card.classList.add('show');
-  card.scrollIntoView({ behavior: 'smooth' });
-}
+        /* ════════════════════════════════════
+           POMODORO IFRAME
+        ════════════════════════════════════ */
+        function showPomodoro() {
+            const card = document.getElementById('focusIframeCard');
+            const frame = document.getElementById('pomodoroFrame');
+            if (frame.src === 'about:blank' || frame.src === '') {
+                frame.src = POMODORO_URL;
+            }
+            card.classList.add('show');
+            card.scrollIntoView({ behavior: 'smooth' });
+        }
 
-function hidePomodoro() {
-  document.getElementById('focusIframeCard').classList.remove('show');
-}
+        function hidePomodoro() {
+            document.getElementById('focusIframeCard').classList.remove('show');
+        }
 
-/* ════════════════════════════════════
-   COMPLETE
-════════════════════════════════════ */
-async function completeTask() {
-  // save to log
-  const entry = {
-    title: currentTask?.title || '專注一輪',
-    duration: currentTask?.duration || '—',
-    ts: new Date().toISOString(),
-    status: 'done'
-  };
-  saveLog(entry);
-  updateStats();
-  renderLog();
-  renderWeekly();
-  renderInsight();
+        /* ════════════════════════════════════
+           COMPLETE
+        ════════════════════════════════════ */
+        async function completeTask() {
+            // save to log
+            const entry = {
+                title: currentTask?.title || '專注一輪',
+                duration: currentTask?.duration || '—',
+                ts: new Date().toISOString(),
+                status: 'done'
+            };
+            saveLog(entry);
+            updateStats();
+            renderLog();
+            renderWeekly();
+            renderInsight();
 
-  // fetch completion message
-  let msg = '你完成了一輪專注。每一次開始，都是改變的積累。';
-  try {
-    const apiKey = localStorage.getItem('anthropic_api_key');
-    if (apiKey) {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': apiKey
-        },
-        body: JSON.stringify({
-          model: 'claude-3-5-sonnet-20241022',
-          max_tokens: 1000,
-          messages: [{
-            role: 'user',
-            content: `使用者剛剛完成了這個任務：「${currentTask?.title}」。請給他一句簡短溫暖的完成回饋（繁體中文，40字以內，語氣像朋友，不要太誇張，不要用「太棒了」或「超讚」這類詞）。只回那一句話就好。`
-          }]
-        })
-      });
-      if (res.ok) {
-        const data = await res.json();
-        msg = data.content?.[0]?.text || msg;
-      }
-    }
-  } catch(e) {
-    console.error('Completion message error:', e);
-  }
+            // fetch completion message
+            let msg = '你完成了一輪專注。每一次開始，都是改變的積累。';
+            try {
+                const apiKey = localStorage.getItem('anthropic_api_key');
+                if (apiKey) {
+                    const res = await fetch('https://api.anthropic.com/v1/messages', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'x-api-key': apiKey
+                        },
+                        body: JSON.stringify({
+                            model: 'claude-3-5-sonnet-20241022',
+                            max_tokens: 1000,
+                            messages: [{
+                                role: 'user',
+                                content: `使用者剛剛完成了這個任務：「${currentTask?.title}」。請給他一句簡短溫暖的完成回饋（繁體中文，40字以內，語氣像朋友，不要太誇張，不要用「太棒了」或「超讚」這類詞）。只回那一句話就好。`
+                            }]
+                        })
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        msg = data.content?.[0]?.text || msg;
+                    }
+                }
+            } catch (e) {
+                console.error('Completion message error:', e);
+            }
 
-  document.getElementById('completionMsg').textContent = msg;
-  document.getElementById('completionOverlay').classList.add('show');
-  updateEncouragement();
-}
+            document.getElementById('completionMsg').textContent = msg;
+            document.getElementById('completionOverlay').classList.add('show');
+            updateEncouragement();
+        }
 
-function closeCompletion() {
-  document.getElementById('completionOverlay').classList.remove('show');
-  goBackToCheckin();
-}
+        function closeCompletion() {
+            document.getElementById('completionOverlay').classList.remove('show');
+            goBackToCheckin();
+        }
 
-/* ════════════════════════════════════
-   RESET
-════════════════════════════════════ */
-function showReset() {
-  showScreen('screen-reset');
-}
+        /* ════════════════════════════════════
+           RESET
+        ════════════════════════════════════ */
+        function showReset() {
+            showScreen('screen-reset');
+        }
 
-function goBackToCheckin() {
-  document.querySelectorAll('.state-opt').forEach(b => b.classList.remove('selected'));
-  currentState = null;
-  currentTask  = null;
-  document.getElementById('goalInput').value = '';
-  const genBtn = document.getElementById('generateBtn');
-  genBtn.style.opacity = '0.4';
-  genBtn.style.pointerEvents = 'none';
-  hidePomodoro();
-  showScreen('screen-checkin');
-}
+        function goBackToCheckin() {
+            document.querySelectorAll('.state-opt').forEach(b => b.classList.remove('selected'));
+            currentState = null;
+            currentTask = null;
+            document.getElementById('goalInput').value = '';
+            const genBtn = document.getElementById('generateBtn');
+            genBtn.style.opacity = '0.4';
+            genBtn.style.pointerEvents = 'none';
+            hidePomodoro();
 
-/* ════════════════════════════════════
-   ENCOURAGEMENT (right panel)
-════════════════════════════════════ */
-const encouragements = [
-  '打開這裡，就是一個開始。\n不需要完美，只需要一小步。',
-  '你已經做到最難的那一步了。\n開始，本來就不容易。',
-  '每一輪專注，都在累積屬於你的改變。',
-  '不是每天都有動力，但你還是打開了這裡。',
-];
-const identities = [
-  '每天都能重新開始的人',
-  '懂得照顧自己節奏的人',
-  '把小事做完的人',
-  '不放棄的人',
-];
+            // 回到 Layer 1
+            document.querySelector('.app').classList.remove('layer2');
 
-function updateEncouragement() {
-  const log = getLog();
-  const idx = log.length % encouragements.length;
-  document.getElementById('encText').textContent = encouragements[idx];
-  document.getElementById('identityWord').textContent = identities[idx % identities.length];
-}
+            showScreen('screen-checkin');
+        }
 
-/* ════════════════════════════════════
-   LOG
-════════════════════════════════════ */
-function getLog() {
-  try { return JSON.parse(localStorage.getItem(KEY_LOG) || '[]'); }
-  catch(e) { return []; }
-}
-function saveLog(entry) {
-  const log = getLog();
-  log.unshift(entry);
-  localStorage.setItem(KEY_LOG, JSON.stringify(log.slice(0, 100)));
-}
-function clearLog() {
-  if (confirm('確定要清除所有紀錄？')) {
-    localStorage.removeItem(KEY_LOG);
-    localStorage.removeItem(KEY_WEEKLY);
-    renderLog(); updateStats(); renderWeekly(); renderInsight();
-  }
-}
+        /* ════════════════════════════════════
+           ENCOURAGEMENT (right panel)
+        ════════════════════════════════════ */
+        const encouragements = [
+            '打開這裡，就是一個開始。\n不需要完美，只需要一小步。',
+            '你已經做到最難的那一步了。\n開始，本來就不容易。',
+            '每一輪專注，都在累積屬於你的改變。',
+            '不是每天都有動力，但你還是打開了這裡。',
+        ];
+        const identities = [
+            '每天都能重新開始的人',
+            '懂得照顧自己節奏的人',
+            '把小事做完的人',
+            '不放棄的人',
+        ];
 
-function renderLog() {
-  const log = getLog();
-  const el = document.getElementById('taskLogList');
-  if (log.length === 0) {
-    el.innerHTML = '<div class="task-log-empty">還沒有紀錄。完成第一輪後就會顯示在這裡。</div>';
-    return;
-  }
-  el.innerHTML = log.slice(0, 8).map(item => {
-    const d = new Date(item.ts);
-    const time = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-    return `
+        function updateEncouragement() {
+            const log = getLog();
+            const idx = log.length % encouragements.length;
+            document.getElementById('encText').textContent = encouragements[idx];
+            document.getElementById('identityWord').textContent = identities[idx % identities.length];
+        }
+
+        /* ════════════════════════════════════
+           LOG
+        ════════════════════════════════════ */
+        function getLog() {
+            try { return JSON.parse(localStorage.getItem(KEY_LOG) || '[]'); }
+            catch (e) { return []; }
+        }
+        function saveLog(entry) {
+            const log = getLog();
+            log.unshift(entry);
+            localStorage.setItem(KEY_LOG, JSON.stringify(log.slice(0, 100)));
+        }
+        function clearLog() {
+            if (confirm('確定要清除所有紀錄？')) {
+                localStorage.removeItem(KEY_LOG);
+                localStorage.removeItem(KEY_WEEKLY);
+                renderLog(); updateStats(); renderWeekly(); renderInsight();
+            }
+        }
+
+        function renderLog() {
+            const log = getLog();
+            const el = document.getElementById('taskLogList');
+            if (log.length === 0) {
+                el.innerHTML = '<div class="task-log-empty">還沒有紀錄。完成第一輪後就會顯示在這裡。</div>';
+                return;
+            }
+            el.innerHTML = log.slice(0, 8).map(item => {
+                const d = new Date(item.ts);
+                const time = `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+                return `
       <div class="task-log-item">
         <div class="task-log-dot ${item.status === 'done' ? 'done' : 'skipped'}"></div>
         <div class="task-log-content">
@@ -1368,99 +1740,100 @@ function renderLog() {
         </div>
       </div>
     `;
-  }).join('');
-}
+            }).join('');
+        }
 
-/* ════════════════════════════════════
-   STATS
-════════════════════════════════════ */
-function updateStats() {
-  const log = getLog();
-  const today = new Date().toISOString().slice(0,10);
-  const todayLog = log.filter(l => l.ts.startsWith(today) && l.status === 'done');
-  const total    = log.filter(l => l.ts.startsWith(today));
+        /* ════════════════════════════════════
+           STATS
+        ════════════════════════════════════ */
+        function updateStats() {
+            const log = getLog();
+            const today = new Date().toISOString().slice(0, 10);
+            const todayLog = log.filter(l => l.ts.startsWith(today) && l.status === 'done');
+            const total = log.filter(l => l.ts.startsWith(today));
 
-  const done = todayLog.length;
-  const mins = todayLog.reduce((s, l) => {
-    const m = parseInt(l.duration) || 0;
-    return s + m;
-  }, 0);
-  const rate = total.length > 0 ? Math.round(done / total.length * 100) : null;
+            const done = todayLog.length;
+            const mins = todayLog.reduce((s, l) => {
+                const m = parseInt(l.duration) || 0;
+                return s + m;
+            }, 0);
+            const rate = total.length > 0 ? Math.round(done / total.length * 100) : null;
 
-  document.getElementById('statDone').innerHTML = `${done}<small>輪</small>`;
-  document.getElementById('statMins').innerHTML = `${mins}<small>分</small>`;
-  document.getElementById('statRate').textContent = rate !== null ? `${rate}%` : '—';
+            document.getElementById('statDone').innerHTML = `${done}<small>輪</small>`;
+            document.getElementById('statMins').innerHTML = `${mins}<small>分</small>`;
+            document.getElementById('statRate').textContent = rate !== null ? `${rate}%` : '—';
 
-  const pct = Math.min(done / 4 * 100, 100);
-  document.getElementById('progressFill').style.width = pct + '%';
-  document.getElementById('progressLabel').textContent = `${done} / 4`;
-}
+            const pct = Math.min(done / 4 * 100, 100);
+            document.getElementById('progressFill').style.width = pct + '%';
+            document.getElementById('progressLabel').textContent = `${done} / 4`;
+        }
 
-/* ════════════════════════════════════
-   WEEKLY CHART
-════════════════════════════════════ */
-function renderWeekly() {
-  const log = getLog();
-  const days = ['日','一','二','三','四','五','六'];
-  const today = new Date();
-  const todayDay = today.getDay();
+        /* ════════════════════════════════════
+           WEEKLY CHART
+        ════════════════════════════════════ */
+        function renderWeekly() {
+            const log = getLog();
+            const days = ['日', '一', '二', '三', '四', '五', '六'];
+            const today = new Date();
+            const todayDay = today.getDay();
 
-  const el = document.getElementById('weekChart');
-  el.innerHTML = '';
+            const el = document.getElementById('weekChart');
+            el.innerHTML = '';
 
-  for (let i = 6; i >= 0; i--) {
-    const d = new Date(today);
-    d.setDate(today.getDate() - i);
-    const key = d.toISOString().slice(0,10);
-    const count = log.filter(l => l.ts.startsWith(key) && l.status === 'done').length;
-    const isToday = i === 0;
-    const maxH = 68;
-    const h = count > 0 ? Math.max(10, Math.min(count * 14, maxH)) : 4;
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date(today);
+                d.setDate(today.getDate() - i);
+                const key = d.toISOString().slice(0, 10);
+                const count = log.filter(l => l.ts.startsWith(key) && l.status === 'done').length;
+                const isToday = i === 0;
+                const maxH = 68;
+                const h = count > 0 ? Math.max(10, Math.min(count * 14, maxH)) : 4;
 
-    const wrap = document.createElement('div');
-    wrap.className = 'week-bar-wrap';
-    wrap.innerHTML = `
+                const wrap = document.createElement('div');
+                wrap.className = 'week-bar-wrap';
+                wrap.innerHTML = `
       <div class="week-bar ${isToday ? 'today' : (count > 0 ? 'has-data' : '')}"
            style="height:${h}px" title="${count} 輪"></div>
       <div class="week-day ${isToday ? 'today' : ''}">${days[d.getDay()]}</div>
     `;
-    el.appendChild(wrap);
-  }
-}
+                el.appendChild(wrap);
+            }
+        }
 
-/* ════════════════════════════════════
-   INSIGHT
-════════════════════════════════════ */
-function renderInsight() {
-  const log = getLog();
-  const insights = [];
+        /* ════════════════════════════════════
+           INSIGHT
+        ════════════════════════════════════ */
+        function renderInsight() {
+            const log = getLog();
+            const insights = [];
 
-  if (log.length === 0) {
-    insights.push({ icon: '🌱', text: '每次打開這個頁面，都是你選擇開始的證明。' });
-    insights.push({ icon: '🔄', text: '重新開始的次數，比從不停止更重要。' });
-  } else {
-    const done = log.filter(l => l.status === 'done').length;
-    insights.push({ icon: '✨', text: `你已經完成了 ${done} 輪專注。每一輪都算數。` });
+            if (log.length === 0) {
+                insights.push({ icon: '🌱', text: '每次打開這個頁面，都是你選擇開始的證明。' });
+                insights.push({ icon: '🔄', text: '重新開始的次數，比從不停止更重要。' });
+            } else {
+                const done = log.filter(l => l.status === 'done').length;
+                insights.push({ icon: '✨', text: `你已經完成了 ${done} 輪專注。每一輪都算數。` });
 
-    const days = new Set(log.map(l => l.ts.slice(0,10))).size;
-    if (days >= 2) {
-      insights.push({ icon: '📅', text: `你已經連續 ${days} 天打開了這裡，這比你想的更難得。` });
-    } else {
-      insights.push({ icon: '🔄', text: '重新開始的勇氣，比從來不停更珍貴。' });
-    }
+                const days = new Set(log.map(l => l.ts.slice(0, 10))).size;
+                if (days >= 2) {
+                    insights.push({ icon: '📅', text: `你已經連續 ${days} 天打開了這裡，這比你想的更難得。` });
+                } else {
+                    insights.push({ icon: '🔄', text: '重新開始的勇氣，比從來不停更珍貴。' });
+                }
 
-    if (done >= 3) {
-      insights.push({ icon: '🧭', text: '你開始的次數越來越多了。這就是改變的樣子。' });
-    }
-  }
+                if (done >= 3) {
+                    insights.push({ icon: '🧭', text: '你開始的次數越來越多了。這就是改變的樣子。' });
+                }
+            }
 
-  document.getElementById('insightList').innerHTML = insights.map(i => `
+            document.getElementById('insightList').innerHTML = insights.map(i => `
     <div class="insight-item">
       <div class="insight-icon">${i.icon}</div>
       <div class="insight-text">${i.text}</div>
     </div>
   `).join('');
-}
-</script>
+        }
+    </script>
 </body>
+
 </html>
