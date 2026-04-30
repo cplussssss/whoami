@@ -807,6 +807,7 @@ input, textarea { font-family: var(--sans); }
     <div class="logo">
       <div class="logo-dot"></div>
       <div class="logo-text">AI 習慣導航員</div>
+      <button onclick="manageApiKey()" title="設置 API 密鑰" style="margin-left:auto;background:none;border:none;cursor:pointer;font-size:0.8rem;color:var(--ink3);padding:4px;transition:color 0.15s">⚙️</button>
     </div>
 
     <!-- SCREEN: CHECKIN -->
@@ -1020,7 +1021,37 @@ window.addEventListener('DOMContentLoaded', () => {
   renderWeekly();
   updateStats();
   renderInsight();
+
+  // 檢查是否有 API Key
+  const hasKey = !!localStorage.getItem('anthropic_api_key');
+  if (!hasKey) {
+    console.log('💡 提示：設置 API 密鑰以使用 AI 任務生成功能');
+  }
 });
+
+function manageApiKey() {
+  const current = localStorage.getItem('anthropic_api_key') || '';
+  const newKey = prompt(
+    `🔑 Anthropic API 密鑰管理\n\n` +
+    `當前狀態：${current ? '✅ 已設置' : '❌ 未設置'}\n\n` +
+    `在此貼上你的 API Key\n(從 https://console.anthropic.com 獲取)\n\n` +
+    `• 只會存在你的瀏覽器本地\n` +
+    `• 永遠不會上傳到任何伺服器\n` +
+    `• 要清除，留空後按確定\n\n` +
+    `API Key:`,
+    current
+  );
+
+  if (newKey !== null) {
+    if (newKey.trim()) {
+      localStorage.setItem('anthropic_api_key', newKey.trim());
+      alert('✅ API 密鑰已保存！\n\n下次使用時將自動調用 AI 任務生成。');
+    } else {
+      localStorage.removeItem('anthropic_api_key');
+      alert('🗑️ API 密鑰已清除');
+    }
+  }
+}
 
 /* ════════════════════════════════════
    SCREEN SWITCHER
@@ -1085,25 +1116,60 @@ ${simplifyNote}
 }
 `.trim();
 
+  const apiKey = localStorage.getItem('anthropic_api_key');
+
+  if (!apiKey) {
+    // 沒有 API Key，使用 fallback
+    useFallbackTask();
+    // 延遲提示用戶
+    setTimeout(() => {
+      const msg = `💡 提示：要使用 AI 任務生成，請設置你的 API 密鑰\n\n` +
+                  `1. 點擊左上角 ⚙️ 按鈕\n` +
+                  `2. 在 https://console.anthropic.com 獲取你的 API Key\n` +
+                  `3. 貼上並保存\n\n` +
+                  `目前使用預設任務（仍然會根據你的狀態調整難度）`;
+      alert(msg);
+    }, 300);
+    return;
+  }
+
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey
+      },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-3-5-sonnet-20241022',
         max_tokens: 1000,
         messages: [{ role: 'user', content: prompt }]
       })
     });
+
+    if (!res.ok) {
+      if (res.status === 401) {
+        alert('❌ API Key 無效或已過期\n\n請檢查你的 API Key 是否正確');
+        localStorage.removeItem('anthropic_api_key');
+      } else {
+        throw new Error(`API error: ${res.status} ${res.statusText}`);
+      }
+      useFallbackTask();
+      return;
+    }
+
     const data = await res.json();
     let text = data.content?.[0]?.text || '';
-    // strip possible markdown fences
     text = text.replace(/```json|```/g, '').trim();
     const parsed = JSON.parse(text);
     currentTask = parsed;
     showTaskScreen(parsed);
   } catch(e) {
-    // fallback
+    console.error('Task generation error:', e);
+    useFallbackTask();
+  }
+
+  function useFallbackTask() {
     const fallbacks = {
       exhausted:  { duration:'2 分鐘', title:'打開你要做的東西，看一眼就好', why:'就算只是打開，也比什麼都沒做更好。', note:'你很累了，沒關係。2 分鐘，隨時可以停。', encouragement:'打開就是開始了' },
       tired:      { duration:'3 分鐘', title:'把今天最重要的一件事寫下來', why:'寫下來能幫大腦卸下記憶的重量。', note:'有點累但還想動，這樣的你已經很好了。', encouragement:'寫下來，就輕了一點' },
@@ -1185,21 +1251,31 @@ async function completeTask() {
   // fetch completion message
   let msg = '你完成了一輪專注。每一次開始，都是改變的積累。';
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        messages: [{
-          role: 'user',
-          content: `使用者剛剛完成了這個任務：「${currentTask?.title}」。請給他一句簡短溫暖的完成回饋（繁體中文，40字以內，語氣像朋友，不要太誇張，不要用「太棒了」或「超讚」這類詞）。只回那一句話就好。`
-        }]
-      })
-    });
-    const data = await res.json();
-    msg = data.content?.[0]?.text || msg;
-  } catch(e) {}
+    const apiKey = localStorage.getItem('anthropic_api_key');
+    if (apiKey) {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey
+        },
+        body: JSON.stringify({
+          model: 'claude-3-5-sonnet-20241022',
+          max_tokens: 1000,
+          messages: [{
+            role: 'user',
+            content: `使用者剛剛完成了這個任務：「${currentTask?.title}」。請給他一句簡短溫暖的完成回饋（繁體中文，40字以內，語氣像朋友，不要太誇張，不要用「太棒了」或「超讚」這類詞）。只回那一句話就好。`
+          }]
+        })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        msg = data.content?.[0]?.text || msg;
+      }
+    }
+  } catch(e) {
+    console.error('Completion message error:', e);
+  }
 
   document.getElementById('completionMsg').textContent = msg;
   document.getElementById('completionOverlay').classList.add('show');
