@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>我是誰？AI 習慣導航員</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700&family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
+        rel="stylesheet" />
+    <style>
+        /* =============================================
+       CSS 變數
+    ============================================= */
+        :root {
+            --bg: #f5f2ec;
+            --bg-card: #faf8f4;
+            --ink: #1c1a17;
+            --ink-muted: #6b6760;
+            --ink-faint: #b0ada8;
+            --accent: #c85a2a;
+            /* 番茄橘 */
+            --accent-soft: #f0ddd3;
+            --green: #3a7d5e;
+            --green-soft: #d4ece1;
+            --blue: #2d5fa8;
+            --blue-soft: #d4e2f5;
+            --border: #e2ddd6;
+            --shadow: rgba(28, 26, 23, 0.08);
+
+            --font-serif: 'Noto Serif TC', serif;
+            --font-mono: 'Space Mono', monospace;
+            --font-sans: 'DM Sans', sans-serif;
+        }
+
+        /* =============================================
+       Reset & Base
+    ============================================= */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--ink);
+            font-family: var(--font-sans);
+            line-height: 1.65;
+            min-height: 100vh;
+        }
+
+        /* =============================================
+       頂部導覽
+    ============================================= */
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+            height: 56px;
+        }
+
+        .topbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--ink);
+        }
+
+        .topbar-brand .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--accent);
+        }
+
+        .topbar-brand span {
+            font-family: var(--font-serif);
+            font-size: 0.95rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+
+        .topbar-nav {
+            display: flex;
+            gap: 4px;
+        }
+
+        .nav-tab {
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: var(--ink-muted);
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            transition: all 0.18s;
+            font-family: var(--font-sans);
+            letter-spacing: 0.01em;
+        }
+
+        .nav-tab:hover {
+            background: var(--border);
+            color: var(--ink);
+        }
+
+        .nav-tab.active {
+            background: var(--ink);
+            color: var(--bg);
+        }
+
+        /* =============================================
+       主容器
+    ============================================= */
+        .app {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 24px 80px;
+        }
+
+        /* =============================================
+       頁面（分頁切換）
+    ============================================= */
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* =============================================
+       首頁 Hero
+    ============================================= */
+        .hero {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 48px;
+            align-items: start;
+            margin-bottom: 64px;
+        }
+
+        @media (max-width: 720px) {
+            .hero {
+                grid-template-columns: 1fr;
+                gap: 32px;
+            }
+        }
+
+        .hero-text {}
+
+        .hero-eyebrow {
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 16px;
+        }
+
+        .hero-title {
+            font-family: var(--font-serif);
+            font-size: clamp(2rem, 4vw, 2.8rem);
+            font-weight: 700;
+            line-height: 1.25;
+            margin-bottom: 20px;
+            color: var(--ink);
+        }
+
+        .hero-title em {
+            font-style: normal;
+            color: var(--accent);
+        }
+
+        .hero-desc {
+            font-size: 1rem;
+            color: var(--ink-muted);
+            line-height: 1.75;
+            max-width: 420px;
+        }
+
+        .hero-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 32px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px 18px;
+        }
+
+        .stat-number {
+            font-family: var(--font-mono);
+            font-size: 1.9rem;
+            font-weight: 700;
+            color: var(--ink);
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+
+        .stat-number span {
+            font-size: 1rem;
+            color: var(--accent);
+        }
+
+        .stat-label {
+            font-size: 0.78rem;
+            color: var(--ink-muted);
+        }
+
+        /* =============================================
+       今日狀態卡（首頁右側）
+    ============================================= */
+        .today-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px 24px;
+        }
+
+        .today-card-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .today-card-header h3 {
+            font-family: var(--font-serif);
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .badge-new {
+            font-family: var(--font-mono);
+            font-size: 0.62rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            background: var(--accent-soft);
+            color: var(--accent);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .checkin-form {}
+
+        .checkin-label {
+            font-size: 0.8rem;
+            color: var(--ink-muted);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .mood-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .mood-btn {
+            padding: 8px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: transparent;
+            font-size: 0.82rem;
+            color: var(--ink-muted);
+            cursor: pointer;
+            transition: all 0.15s;
+            font-family: var(--font-sans);
+        }
+
+        .mood-btn:hover {
+            border-color: var(--ink-muted);
+            color: var(--ink);
+        }
+
+        .mood-btn.selected {
+            background: var(--ink);
+            color: var(--bg);
+            border-color: var(--ink);
+        }
+
+        .energy-row {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 20px;
+        }
+
+        .energy-dot {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 1.5px solid var(--border);
+            cursor: pointer;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-family: var(--font-mono);
+            color: var(--ink-faint);
+        }
+
+        .energy-dot:hover {
+            border-color: var(--accent);
+        }
+
+        .energy-dot.filled {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+
+        .checkin-btn {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            background: var(--ink);
+            color: var(--bg);
+            font-size: 0.88rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity 0.15s;
+            font-family: var(--font-sans);
+        }
+
+        .checkin-btn:hover {
+            opacity: 0.85;
+        }
+
+        .checkin-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .ai-suggestion {
+            display: none;
+            margin-top: 16px;
+            padding: 14px 16px;
+            background: var(--accent-soft);
+            border-radius: 10px;
+            border-left: 3px solid var(--accent);
+        }
+
+        .ai-suggestion.show {
+            display: block;
+        }
+
+        .ai-suggestion-label {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 6px;
+        }
+
+        .ai-suggestion-text {
+            font-size: 0.85rem;
+            color: var(--ink);
+            line-height: 1.6;
+        }
+
+        /* =============================================
+       三層多巴胺說明區
+    ============================================= */
+        .section-title {
+            font-family: var(--font-serif);
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .dopamine-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 48px;
+        }
+
+        @media (max-width: 600px) {
+            .dopamine-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .dopamine-card {
+            border-radius: 14px;
+            padding: 24px 20px;
+            border: 1px solid var(--border);
+        }
+
+        .dopamine-card.immediate {
+            background: #fff8f5;
+        }
+
+        .dopamine-card.short {
+            background: #f5faf7;
+        }
+
+        .dopamine-card.long {
+            background: #f5f8ff;
+        }
+
+        .dopamine-icon {
+            font-size: 1.6rem;
+            margin-bottom: 12px;
+        }
+
+        .dopamine-tag {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .dopamine-card.immediate .dopamine-tag {
+            color: var(--accent);
+        }
+
+        .dopamine-card.short .dopamine-tag {
+            color: var(--green);
+        }
+
+        .dopamine-card.long .dopamine-tag {
+            color: var(--blue);
+        }
+
+        .dopamine-name {
+            font-family: var(--font-serif);
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .dopamine-desc {
+            font-size: 0.82rem;
+            color: var(--ink-muted);
+            line-height: 1.6;
+        }
+
+        /* =============================================
+       番茄鐘分頁
+    ============================================= */
+        .focus-page-header {
+            margin-bottom: 28px;
+        }
+
+        .focus-page-header h2 {
+            font-family: var(--font-serif);
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .focus-page-header p {
+            font-size: 0.88rem;
+            color: var(--ink-muted);
+        }
+
+        .iframe-wrapper {
+            width: 100%;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            background: #1a1a1e;
+            box-shadow: 0 8px 40px var(--shadow);
+        }
+
+        .iframe-wrapper iframe {
+            width: 100%;
+            height: 820px;
+            border: none;
+            display: block;
+        }
+
+        @media (max-width: 600px) {
+            .iframe-wrapper iframe {
+                height: 900px;
+            }
+        }
+
+        /* =============================================
+       進度分頁（佔位）
+    ============================================= */
+        .coming-soon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+            text-align: center;
+            gap: 12px;
+        }
+
+        .coming-soon-icon {
+            font-size: 3rem;
+        }
+
+        .coming-soon h3 {
+            font-family: var(--font-serif);
+            font-size: 1.3rem;
+            color: var(--ink);
+        }
+
+        .coming-soon p {
+            font-size: 0.88rem;
+            color: var(--ink-muted);
+            max-width: 320px;
+        }
+
+        .coming-soon-badge {
+            font-family: var(--font-mono);
+            font-size: 0.68rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            background: var(--border);
+            color: var(--ink-muted);
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+
+        /* =============================================
+       Loading 動畫
+    ============================================= */
+        .iframe-loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 820px;
+            gap: 8px;
+            color: var(--ink-faint);
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+        }
+
+        .loading-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent);
+            animation: blink 1.2s infinite;
+        }
+
+        .loading-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .loading-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes blink {
+
+            0%,
+            80%,
+            100% {
+                opacity: 0.2;
+                transform: scale(0.8);
+            }
+
+            40% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* =============================================
+       動畫：頁面進場
+    ============================================= */
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .page.active>* {
+            animation: fadeUp 0.3s ease both;
+        }
+
+        .page.active>*:nth-child(2) {
+            animation-delay: 0.05s;
+        }
+
+        .page.active>*:nth-child(3) {
+            animation-delay: 0.1s;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ===== 頂部導覽 ===== -->
+    <nav class="topbar">
+        <a class="topbar-brand" href="#">
+            <div class="dot"></div>
+            <span>我是誰？AI 習慣導航員</span>
+        </a>
+        <div class="topbar-nav">
+            <button class="nav-tab active" data-page="home">首頁</button>
+            <button class="nav-tab" data-page="focus">專注計時</button>
+            <button class="nav-tab" data-page="progress">我的進度</button>
+            <button class="nav-tab" data-page="identity">我是誰</button>
+        </div>
+    </nav>
+
+    <!-- ===== 主容器 ===== -->
+    <div class="app">
+
+        <!-- ══════════════════════════════
+       首頁
+  ══════════════════════════════ -->
+        <div class="page active" id="page-home">
+
+            <div class="hero">
+                <!-- 左：文案 -->
+                <div class="hero-text">
+                    <div class="hero-eyebrow">AI 行為設計系統</div>
+                    <h1 class="hero-title">
+                        不是叫你<em>更自律</em>，<br>
+                        而是幫你<em>更容易開始</em>
+                    </h1>
+                    <p class="hero-desc">
+                        大腦不是不想改變，而是總在選擇更低阻力的快樂。
+                        這裡的每一個功能，都是為了讓你的大腦願意持續下去而設計的。
+                    </p>
+
+                    <div class="hero-stats">
+                        <div class="stat-card">
+                            <div class="stat-number" id="stat-sessions">0 <span>輪</span></div>
+                            <div class="stat-label">累積專注輪數</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="stat-minutes">0 <span>分</span></div>
+                            <div class="stat-label">累積專注分鐘</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="stat-streak">0 <span>天</span></div>
+                            <div class="stat-label">連續使用天數</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="stat-rate">— <span>%</span></div>
+                            <div class="stat-label">任務完成率</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 右：今日狀態問診 -->
+                <div class="today-card">
+                    <div class="today-card-header">
+                        <h3>今日狀態問診</h3>
+                        <span class="badge-new">每日</span>
+                    </div>
+
+                    <div class="checkin-form">
+                        <label class="checkin-label">現在的心情是？</label>
+                        <div class="mood-row">
+                            <button class="mood-btn" data-mood="平靜">😌 平靜</button>
+                            <button class="mood-btn" data-mood="有動力">⚡ 有動力</button>
+                            <button class="mood-btn" data-mood="有點累">😮‍💨 有點累</button>
+                            <button class="mood-btn" data-mood="很焦慮">😰 很焦慮</button>
+                            <button class="mood-btn" data-mood="分心">🌀 分心</button>
+                        </div>
+
+                        <label class="checkin-label">目前的電量（1 = 快沒電，5 = 滿血）</label>
+                        <div class="energy-row" id="energyRow">
+                            <div class="energy-dot" data-level="1">1</div>
+                            <div class="energy-dot" data-level="2">2</div>
+                            <div class="energy-dot" data-level="3">3</div>
+                            <div class="energy-dot" data-level="4">4</div>
+                            <div class="energy-dot" data-level="5">5</div>
+                        </div>
+
+                        <button class="checkin-btn" id="checkinBtn" disabled>
+                            讓 AI 幫我調整今天的任務 →
+                        </button>
+
+                        <div class="ai-suggestion" id="aiSuggestion">
+                            <div class="ai-suggestion-label">AI 建議</div>
+                            <div class="ai-suggestion-text" id="aiSuggestionText">載入中…</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 三層多巴胺說明 -->
+            <h2 class="section-title">你的行為系統是怎麼設計的</h2>
+            <div class="dopamine-grid">
+                <div class="dopamine-card immediate">
+                    <div class="dopamine-icon">⚡</div>
+                    <div class="dopamine-tag">立即多巴胺</div>
+                    <div class="dopamine-name">3 秒內得到回饋</div>
+                    <div class="dopamine-desc">每次開始計時、完成一輪，立刻得到回應。解決啟動最困難的那一步。</div>
+                </div>
+                <div class="dopamine-card short">
+                    <div class="dopamine-icon">📈</div>
+                    <div class="dopamine-tag">短期多巴胺</div>
+                    <div class="dopamine-name">看見自己正在變好</div>
+                    <div class="dopamine-desc">每天、每週的進度累積可見。不是空洞的打卡，而是真實的前進感。</div>
+                </div>
+                <div class="dopamine-card long">
+                    <div class="dopamine-icon">🧭</div>
+                    <div class="dopamine-tag">長期多巴胺</div>
+                    <div class="dopamine-name">從做事變成成為某種人</div>
+                    <div class="dopamine-desc">把每一輪的習慣連結到你想成為的身份，讓改變穩定下來。</div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ══════════════════════════════
+       專注計時（番茄鐘嵌入）
+  ══════════════════════════════ -->
+        <div class="page" id="page-focus">
+            <div class="focus-page-header">
+                <h2>專注計時</h2>
+                <p>你的番茄鐘，原汁原味。完成後 AI 會給你即時回饋。</p>
+            </div>
+            <div class="iframe-wrapper">
+                <div class="iframe-loading" id="iframeLoading">
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                    <span style="margin-left:8px">載入番茄鐘中</span>
+                </div>
+                <iframe id="pomodoroFrame" src="https://cplussssss.github.io/Focus/" title="番茄鐘" style="display:none"
+                    onload="document.getElementById('iframeLoading').style.display='none'; this.style.display='block';"></iframe>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════
+       我的進度（佔位）
+  ══════════════════════════════ -->
+        <div class="page" id="page-progress">
+            <div class="coming-soon">
+                <div class="coming-soon-icon">📊</div>
+                <span class="coming-soon-badge">即將推出</span>
+                <h3>每日 & 每週進度</h3>
+                <p>你的專注紀錄、完成率、習慣連勝天數，都會在這裡看得到。</p>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════
+       我是誰（佔位）
+  ══════════════════════════════ -->
+        <div class="page" id="page-identity">
+            <div class="coming-soon">
+                <div class="coming-soon-icon">🧭</div>
+                <span class="coming-soon-badge">即將推出</span>
+                <h3>我是誰？</h3>
+                <p>把你每天做的事連結到你想成為的那種人。從做一件事，變成成為某一種人。</p>
+            </div>
+        </div>
+
+    </div><!-- /app -->
+
+    <script>
+        // =============================================
+        // 分頁切換
+        // =============================================
+        const tabs = document.querySelectorAll('.nav-tab');
+        const pages = document.querySelectorAll('.page');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const target = tab.dataset.page;
+                tabs.forEach(t => t.classList.remove('active'));
+                pages.forEach(p => p.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById('page-' + target).classList.add('active');
+            });
+        });
+
+        // =============================================
+        // 今日問診：心情選擇
+        // =============================================
+        let selectedMood = null;
+        let selectedEnergy = null;
+
+        document.querySelectorAll('.mood-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                selectedMood = btn.dataset.mood;
+                checkCheckinReady();
+            });
+        });
+
+        // =============================================
+        // 今日問診：電量選擇
+        // =============================================
+        document.querySelectorAll('.energy-dot').forEach(dot => {
+            dot.addEventListener('click', () => {
+                const level = parseInt(dot.dataset.level);
+                selectedEnergy = level;
+                document.querySelectorAll('.energy-dot').forEach((d, i) => {
+                    d.classList.toggle('filled', (i + 1) <= level);
+                });
+                checkCheckinReady();
+            });
+        });
+
+        function checkCheckinReady() {
+            const btn = document.getElementById('checkinBtn');
+            btn.disabled = !(selectedMood && selectedEnergy);
+        }
+
+        // =============================================
+        // 問診送出 → 呼叫 Claude API
+        // =============================================
+        document.getElementById('checkinBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('checkinBtn');
+            const suggestionBox = document.getElementById('aiSuggestion');
+            const suggestionText = document.getElementById('aiSuggestionText');
+
+            btn.disabled = true;
+            btn.textContent = 'AI 分析中…';
+            suggestionBox.classList.remove('show');
+
+            const prompt = `
+你是一個溫柔的 AI 習慣導航員，專門根據使用者當下的情緒與能量狀態，給出簡短、具體、低阻力的行動建議。
+
+使用者今天的狀態：
+- 心情：${selectedMood}
+- 電量：${selectedEnergy} / 5
+
+請根據以上狀態，用繁體中文給出：
+1. 一句溫暖的回應（理解他的狀態，不責備）
+2. 一個適合現在開始的具體小任務建議（番茄鐘相關，考慮能量調整時間長短）
+3. 一句鼓勵的話
+
+格式：直接用段落寫，不要用條列式，不要加標題，控制在 80 字以內，語氣像朋友。
+    `.trim();
+
+            try {
+                const res = await fetch('https://api.anthropic.com/v1/messages', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: 'claude-sonnet-4-20250514',
+                        max_tokens: 1000,
+                        messages: [{ role: 'user', content: prompt }]
+                    })
+                });
+                const data = await res.json();
+                const text = data.content?.[0]?.text || '抱歉，AI 暫時無法回應，請稍後再試。';
+                suggestionText.textContent = text;
+            } catch (e) {
+                suggestionText.textContent = '抱歉，無法連接 AI，請稍後再試。';
+            }
+
+            suggestionBox.classList.add('show');
+            btn.textContent = '重新問診';
+            btn.disabled = false;
+        });
+
+        // =============================================
+        // 從 localStorage 讀取番茄鐘統計（番茄鐘儲存的 key）
+        // =============================================
+        function loadStats() {
+            try {
+                // 嘗試讀取番茄鐘存的紀錄
+                const raw = localStorage.getItem('pomodoroRecords');
+                if (!raw) return;
+                const records = JSON.parse(raw);
+                if (!Array.isArray(records)) return;
+
+                const completed = records.filter(r => r.status === '已完成');
+                const totalMins = completed.reduce((sum, r) => sum + (r.actualMinutes || r.plannedMinutes || 0), 0);
+                const rate = records.length > 0 ? Math.round(completed.length / records.length * 100) : null;
+
+                // 計算連續天數
+                const days = [...new Set(records.map(r => r.timestamp?.slice(0, 10)))].sort();
+                let streak = 0;
+                if (days.length > 0) {
+                    const today = new Date().toISOString().slice(0, 10);
+                    let cur = new Date(today);
+                    for (let i = days.length - 1; i >= 0; i--) {
+                        const d = new Date(days[i]);
+                        const diff = Math.round((cur - d) / 86400000);
+                        if (diff === 0 || diff === 1) { streak++; cur = d; }
+                        else break;
+                    }
+                }
+
+                document.getElementById('stat-sessions').innerHTML = `${completed.length} <span>輪</span>`;
+                document.getElementById('stat-minutes').innerHTML = `${totalMins} <span>分</span>`;
+                document.getElementById('stat-streak').innerHTML = `${streak} <span>天</span>`;
+                document.getElementById('stat-rate').innerHTML = rate !== null ? `${rate} <span>%</span>` : `— <span>%</span>`;
+            } catch (e) { }
+        }
+
+        loadStats();
+    </script>
+</body>
+
+</html>
