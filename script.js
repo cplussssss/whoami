@@ -171,17 +171,7 @@ function startFocus() {
    POMODORO IFRAME
 ════════════════════════════════════ */
 function showPomodoro() {
-  const card  = document.getElementById('focusIframeCard');
-  const frame = document.getElementById('pomodoroFrame');
-  if (frame.src === 'about:blank' || frame.src === '') {
-    frame.src = POMODORO_URL;
-  }
-  card.classList.add('show');
-  card.scrollIntoView({ behavior: 'smooth' });
-}
-
-function hidePomodoro() {
-  document.getElementById('focusIframeCard').classList.remove('show');
+  window.open(POMODORO_URL, '_blank');
 }
 
 /* ════════════════════════════════════
