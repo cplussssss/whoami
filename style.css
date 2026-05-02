@@ -1,0 +1,1131 @@
+/* ═══════════════════════════════════════
+   VARIABLES
+═══════════════════════════════════════ */
+:root {
+    --bg: #f0ede8;
+    --bg2: #e8e4dd;
+    --surface: #faf8f5;
+    --surface2: #f3f0ea;
+    --border: rgba(0, 0, 0, 0.08);
+    --border2: rgba(0, 0, 0, 0.12);
+    --ink: #1a1814;
+    --ink2: #5a5650;
+    --ink3: #9a9490;
+    --accent: #c0522a;
+    --accent-bg: rgba(192, 82, 42, 0.08);
+    --accent-mid: rgba(192, 82, 42, 0.18);
+    --green: #2e7d5c;
+    --green-bg: rgba(46, 125, 92, 0.08);
+    --blue: #2c5f8a;
+    --blue-bg: rgba(44, 95, 138, 0.08);
+    --gold: #a07830;
+    --gold-bg: rgba(160, 120, 48, 0.1);
+
+    --serif: 'Noto Serif TC', serif;
+    --mono: 'DM Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+
+    --r-sm: 8px;
+    --r-md: 14px;
+    --r-lg: 20px;
+    --r-xl: 28px;
+
+    --ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* ═══════════════════════════════════════
+   RESET
+═══════════════════════════════════════ */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-size: 15px;
+    height: 100%;
+}
+
+body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--ink);
+    height: 100%;
+    overflow: hidden;
+    line-height: 1.6;
+}
+
+button {
+    font-family: var(--sans);
+    cursor: pointer;
+    border: none;
+    background: none;
+}
+
+input,
+textarea {
+    font-family: var(--sans);
+}
+
+/* ═══════════════════════════════════════
+   APP SHELL  — LAYER 1 / LAYER 2
+═══════════════════════════════════════ */
+.app {
+    display: grid;
+    /* Layer 1: 初始狀態，左側全屏置中 */
+    grid-template-columns: 1fr;
+    height: 100vh;
+    overflow: hidden;
+    transition: grid-template-columns 0.5s var(--ease);
+}
+
+/* Layer 2: 選完狀態後轉換成 40% / 60% */
+.app.layer2 {
+    grid-template-columns: 40% 60%;
+}
+
+/* LEFT PANEL */
+.left {
+    background: var(--surface);
+    border-right: 1px solid var(--border2);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+    padding: 28px 24px;
+    gap: 0;
+    position: relative;
+    /* Layer 1: 置中 */
+    align-items: center;
+    justify-content: center;
+    transition: all 0.5s var(--ease);
+}
+
+/* Layer 2: 左側回到正常佈局 */
+.app.layer2 .left {
+    align-items: stretch;
+    justify-content: flex-start;
+    padding: 28px 24px;
+}
+
+/* RIGHT PANEL */
+.right {
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: 100vh;
+    padding: 28px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    /* Layer 1: 隱藏 */
+    display: none;
+    transition: display 0.5s var(--ease);
+}
+
+/* Layer 2: 右側顯示 */
+.app.layer2 .right {
+    display: flex;
+}
+
+.right::-webkit-scrollbar {
+    width: 4px;
+}
+
+.right::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.right::-webkit-scrollbar-thumb {
+    background: var(--border2);
+    border-radius: 2px;
+}
+
+/* ═══════════════════════════════════════
+   LEFT — LOGO
+═══════════════════════════════════════ */
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 28px;
+    /* Layer 1: 隱藏 */
+    display: none;
+}
+
+/* Layer 2: logo 顯示 */
+.app.layer2 .logo {
+    display: flex;
+}
+
+.logo-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+    box-shadow: 0 0 0 3px var(--accent-bg);
+}
+
+.logo-text {
+    font-family: var(--serif);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: 0.01em;
+}
+
+/* LEFT — SCREENS (state machine) */
+.left-screen {
+    display: none;
+    flex-direction: column;
+    flex: 1;
+    gap: 0;
+    overflow: hidden;
+    /* Layer 1: 置中，大卡片 */
+    width: 100%;
+    max-width: 360px;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+}
+
+.left-screen.active {
+    display: flex;
+}
+
+/* Layer 2: 左側屏幕回到正常流 */
+.app.layer2 .left-screen {
+    max-width: none;
+    text-align: left;
+    align-items: stretch;
+    justify-content: flex-start;
+}
+
+/* Screen: checkin - Layer 1 置中卡片 */
+#screen-checkin {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: var(--r-xl);
+    padding: 48px 40px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+    animation: scaleInCenter 0.5s var(--ease) both;
+}
+
+@keyframes scaleInCenter {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Layer 2: checkin 移回左側 */
+.app.layer2 #screen-checkin {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    box-shadow: none;
+    animation: none;
+}
+
+.screen-label {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink3);
+    margin-bottom: 12px;
+    /* Layer 1: 居中 */
+    text-align: center;
+}
+
+/* Layer 2: 左對齐 */
+.app.layer2 .screen-label {
+    text-align: left;
+}
+
+.screen-question {
+    font-family: var(--serif);
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--ink);
+    margin-bottom: 20px;
+    /* Layer 1: 置中，更大字體 */
+    text-align: center;
+    font-size: 1.8rem;
+}
+
+/* Layer 2: 左對齐，回到正常大小 */
+.app.layer2 .screen-question {
+    text-align: left;
+    font-size: 1.25rem;
+}
+
+.state-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
+    /* Layer 1: 寬度受限 */
+    width: 100%;
+}
+
+/* Layer 2: 恢復正常 */
+.app.layer2 .state-options {
+    width: 100%;
+}
+
+.state-opt {
+    padding: 13px 16px;
+    border-radius: var(--r-md);
+    border: 1.5px solid var(--border2);
+    background: transparent;
+    font-size: 0.88rem;
+    color: var(--ink2);
+    text-align: left;
+    transition: all 0.3s var(--ease);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    /* Layer 1: 大卡片 */
+    padding: 24px 20px;
+    border-radius: var(--r-lg);
+    font-size: 1rem;
+    text-align: center;
+}
+
+/* Layer 2: 回到原來的樣式 */
+.app.layer2 .state-opt {
+    padding: 13px 16px;
+    border-radius: var(--r-md);
+    font-size: 0.88rem;
+    text-align: left;
+    flex-direction: row;
+    justify-content: flex-start;
+}
+
+.state-opt:hover {
+    border-color: var(--accent);
+    background: var(--accent-bg);
+    color: var(--ink);
+    transform: translateY(-2px);
+}
+
+/* Layer 2: 回到原來的hover效果 */
+.app.layer2 .state-opt:hover {
+    transform: translateX(3px);
+}
+
+.state-opt.selected {
+    border-color: var(--accent);
+    background: var(--accent-bg);
+    color: var(--ink);
+}
+
+.state-opt .opt-emoji {
+    font-size: 1.1rem;
+    /* Layer 1: 更大 */
+    font-size: 2.5rem;
+}
+
+/* Layer 2: 回到原來的大小 */
+.app.layer2 .state-opt .opt-emoji {
+    font-size: 1.1rem;
+}
+
+.state-opt .opt-text {
+    font-weight: 400;
+    /* Layer 1: 更大 */
+    font-size: 1.1rem;
+}
+
+/* Layer 2: 回到原來的大小 */
+.app.layer2 .state-opt .opt-text {
+    font-size: 0.88rem;
+}
+
+/* goal input */
+.goal-input-wrap {
+    margin-bottom: 16px;
+    /* Layer 1: 隱藏 */
+    display: none;
+}
+
+/* Layer 2: 顯示 */
+.app.layer2 .goal-input-wrap {
+    display: block;
+}
+
+.goal-input-wrap label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--ink3);
+    margin-bottom: 6px;
+    font-family: var(--mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.goal-input {
+    width: 100%;
+    padding: 11px 14px;
+    border-radius: var(--r-sm);
+    border: 1.5px solid var(--border2);
+    background: var(--bg);
+    font-size: 0.88rem;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s;
+}
+
+.goal-input:focus {
+    border-color: var(--accent);
+}
+
+.goal-input::placeholder {
+    color: var(--ink3);
+}
+
+/* ═══════════════════════════════════════
+   LEFT — TASK CARD
+═══════════════════════════════════════ */
+#screen-task {
+    animation: slideIn 0.35s var(--ease) both;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.task-card {
+    background: var(--bg);
+    border: 1.5px solid var(--border2);
+    border-radius: var(--r-lg);
+    padding: 20px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+}
+
+.task-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    background: var(--accent);
+    border-radius: 0 2px 2px 0;
+}
+
+.task-duration {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+}
+
+.task-title {
+    font-family: var(--serif);
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.45;
+    color: var(--ink);
+    margin-bottom: 10px;
+}
+
+.task-why {
+    font-size: 0.8rem;
+    color: var(--ink2);
+    line-height: 1.55;
+    font-style: italic;
+}
+
+.ai-note {
+    background: var(--accent-bg);
+    border-radius: var(--r-sm);
+    padding: 12px 14px;
+    font-size: 0.82rem;
+    color: var(--ink2);
+    line-height: 1.6;
+    margin-bottom: 20px;
+    border-left: 2px solid var(--accent);
+}
+
+.ai-note strong {
+    color: var(--accent);
+    font-weight: 500;
+}
+
+.left-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: auto;
+    padding-top: 16px;
+    /* Layer 1: 隱藏 */
+    display: none;
+}
+
+/* Layer 2: 顯示 */
+.app.layer2 .left-actions {
+    display: flex;
+}
+
+.btn-primary {
+    padding: 14px;
+    border-radius: var(--r-md);
+    background: var(--ink);
+    color: var(--surface);
+    font-size: 0.9rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    transition: all 0.18s var(--ease);
+    text-align: center;
+}
+
+.btn-primary:hover {
+    background: var(--accent);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(192, 82, 42, 0.25);
+}
+
+.btn-secondary {
+    padding: 12px;
+    border-radius: var(--r-md);
+    background: transparent;
+    border: 1.5px solid var(--border2);
+    color: var(--ink2);
+    font-size: 0.84rem;
+    transition: all 0.15s;
+    text-align: center;
+}
+
+.btn-secondary:hover {
+    border-color: var(--ink2);
+    color: var(--ink);
+    background: var(--bg2);
+}
+
+.btn-reset {
+    padding: 11px;
+    border-radius: var(--r-md);
+    background: transparent;
+    color: var(--ink3);
+    font-size: 0.8rem;
+    text-align: center;
+    transition: color 0.15s;
+}
+
+.btn-reset:hover {
+    color: var(--ink2);
+}
+
+/* ═══════════════════════════════════════
+   LEFT — FOCUS MODE
+═══════════════════════════════════════ */
+#screen-focus {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 20px;
+}
+
+.focus-only-label {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink3);
+}
+
+.focus-task-display {
+    font-family: var(--serif);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.4;
+    padding: 0 12px;
+}
+
+.focus-encouragement {
+    font-size: 0.82rem;
+    color: var(--ink3);
+    font-style: italic;
+}
+
+.focus-done-btn {
+    width: 100%;
+    padding: 16px;
+    border-radius: var(--r-md);
+    background: var(--green);
+    color: white;
+    font-size: 0.92rem;
+    font-weight: 500;
+    margin-top: 8px;
+    transition: all 0.18s var(--ease);
+}
+
+.focus-done-btn:hover {
+    background: #226147;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(46, 125, 92, 0.3);
+}
+
+.focus-quit-btn {
+    color: var(--ink3);
+    font-size: 0.8rem;
+    padding: 8px;
+    transition: color 0.15s;
+}
+
+.focus-quit-btn:hover {
+    color: var(--ink2);
+}
+
+/* ═══════════════════════════════════════
+   LEFT — RESET / GENTLE
+═══════════════════════════════════════ */
+#screen-reset {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 16px;
+}
+
+.reset-emoji {
+    font-size: 2.4rem;
+}
+
+.reset-title {
+    font-family: var(--serif);
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--ink);
+}
+
+.reset-body {
+    font-size: 0.85rem;
+    color: var(--ink2);
+    line-height: 1.7;
+    padding: 0 8px;
+}
+
+.reset-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    margin-top: 8px;
+}
+
+/* ═══════════════════════════════════════
+   LEFT — LOADING SPINNER
+═══════════════════════════════════════ */
+#screen-loading {
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    text-align: center;
+}
+
+.loading-ring {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid var(--border2);
+    border-top-color: var(--accent);
+    animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.loading-text {
+    font-size: 0.82rem;
+    color: var(--ink3);
+    font-family: var(--mono);
+}
+
+/* ═══════════════════════════════════════
+   RIGHT — SECTION HEADERS
+═══════════════════════════════════════ */
+.section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.section-title {
+    font-family: var(--serif);
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--ink);
+}
+
+.section-sub {
+    font-size: 0.75rem;
+    color: var(--ink3);
+    font-family: var(--mono);
+}
+
+/* ═══════════════════════════════════════
+   RIGHT — PROGRESS
+═══════════════════════════════════════ */
+.progress-card {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: var(--r-lg);
+    padding: 22px 24px;
+}
+
+.progress-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.stat-item {}
+
+.stat-num {
+    font-family: var(--mono);
+    font-size: 1.6rem;
+    font-weight: 500;
+    color: var(--ink);
+    line-height: 1;
+    margin-bottom: 3px;
+}
+
+.stat-num small {
+    font-size: 0.75rem;
+    color: var(--ink3);
+    margin-left: 2px;
+}
+
+.stat-lbl {
+    font-size: 0.72rem;
+    color: var(--ink3);
+}
+
+.progress-bar-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: var(--ink3);
+    margin-bottom: 6px;
+}
+
+.progress-track {
+    height: 6px;
+    background: var(--bg2);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), #e07040);
+    border-radius: 3px;
+    transition: width 0.8s var(--ease);
+}
+
+/* ═══════════════════════════════════════
+   RIGHT — RECENT TASKS
+═══════════════════════════════════════ */
+.recent-card {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: var(--r-lg);
+    padding: 20px 24px;
+}
+
+.task-log-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.task-log-item:last-child {
+    border-bottom: none;
+}
+
+.task-log-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    margin-top: 6px;
+    flex-shrink: 0;
+}
+
+.task-log-dot.done {
+    background: var(--green);
+}
+
+.task-log-dot.skipped {
+    background: var(--ink3);
+}
+
+.task-log-content {
+    flex: 1;
+}
+
+.task-log-name {
+    font-size: 0.85rem;
+    color: var(--ink);
+    margin-bottom: 2px;
+    font-weight: 400;
+}
+
+.task-log-meta {
+    font-family: var(--mono);
+    font-size: 0.67rem;
+    color: var(--ink3);
+}
+
+.task-log-empty {
+    text-align: center;
+    padding: 32px 0;
+    color: var(--ink3);
+    font-size: 0.82rem;
+}
+
+/* ═══════════════════════════════════════
+   RIGHT — AI ENCOURAGEMENT
+═══════════════════════════════════════ */
+.encouragement-card {
+    background: linear-gradient(135deg, #fdf6f0 0%, #f5f0f8 100%);
+    border: 1px solid var(--border2);
+    border-radius: var(--r-lg);
+    padding: 22px 24px;
+    position: relative;
+    overflow: hidden;
+}
+
+.encouragement-card::after {
+    content: '✦';
+    position: absolute;
+    right: 20px;
+    top: 16px;
+    font-size: 1.2rem;
+    color: var(--accent);
+    opacity: 0.3;
+}
+
+.enc-label {
+    font-family: var(--mono);
+    font-size: 0.63rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+}
+
+.enc-text {
+    font-family: var(--serif);
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--ink);
+    line-height: 1.65;
+}
+
+.identity-line {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+    font-size: 0.8rem;
+    color: var(--ink3);
+}
+
+.identity-line strong {
+    color: var(--green);
+    font-weight: 500;
+}
+
+/* ═══════════════════════════════════════
+   RIGHT — WEEKLY CHART
+═══════════════════════════════════════ */
+.weekly-card {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: var(--r-lg);
+    padding: 20px 24px;
+}
+
+.week-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    height: 80px;
+    margin-top: 8px;
+}
+
+.week-bar-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    height: 100%;
+    justify-content: flex-end;
+}
+
+.week-bar {
+    width: 100%;
+    border-radius: 4px 4px 0 0;
+    background: var(--border2);
+    transition: height 0.6s var(--ease), background 0.3s;
+    min-height: 4px;
+}
+
+.week-bar.today {
+    background: var(--accent);
+}
+
+.week-bar.has-data {
+    background: var(--accent-mid);
+}
+
+.week-day {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    color: var(--ink3);
+    text-transform: uppercase;
+}
+
+.week-day.today {
+    color: var(--accent);
+    font-weight: 700;
+}
+
+/* ═══════════════════════════════════════
+   RIGHT — INSIGHT
+═══════════════════════════════════════ */
+.insight-card {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: var(--r-lg);
+    padding: 20px 24px;
+}
+
+.insight-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.insight-item:last-child {
+    border-bottom: none;
+}
+
+.insight-icon {
+    font-size: 1rem;
+    margin-top: 1px;
+    flex-shrink: 0;
+}
+
+.insight-text {
+    font-size: 0.83rem;
+    color: var(--ink2);
+    line-height: 1.55;
+}
+
+/* ═══════════════════════════════════════
+   RIGHT — FOCUS TIMER (iframe)
+═══════════════════════════════════════ */
+.focus-iframe-card {
+    display: none;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    flex-direction: column;
+}
+
+.focus-iframe-card.show {
+    display: flex;
+}
+
+.focus-iframe-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.focus-iframe-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.4;
+    }
+}
+
+.focus-iframe-label {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink2);
+}
+
+.focus-iframe-card iframe {
+    width: 100%;
+    height: 700px;
+    border: none;
+    display: block;
+    background: #1a1a1e;
+}
+
+/* ═══════════════════════════════════════
+   COMPLETION ANIMATION OVERLAY
+═══════════════════════════════════════ */
+.completion-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(240, 237, 232, 0.92);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    backdrop-filter: blur(4px);
+}
+
+.completion-overlay.show {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.completion-inner {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    animation: popIn 0.4s var(--ease) both;
+}
+
+@keyframes popIn {
+    from {
+        transform: scale(0.85);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.completion-emoji {
+    font-size: 3rem;
+}
+
+.completion-title {
+    font-family: var(--serif);
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--ink);
+}
+
+.completion-msg {
+    font-size: 0.9rem;
+    color: var(--ink2);
+    max-width: 280px;
+    line-height: 1.65;
+}
+
+.completion-btn {
+    margin-top: 8px;
+    padding: 14px 32px;
+    border-radius: var(--r-md);
+    background: var(--ink);
+    color: var(--surface);
+    font-size: 0.88rem;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.18s var(--ease);
+}
+
+.completion-btn:hover {
+    background: var(--green);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(46, 125, 92, 0.3);
+}
+
+/* ═══════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════ */
+@media (max-width: 800px) {
+    body {
+        overflow: auto;
+    }
+
+    .app {
+        grid-template-columns: 1fr;
+        height: auto;
+        overflow: visible;
+    }
+
+    .left {
+        height: auto;
+        overflow: visible;
+        padding: 24px 20px;
+    }
+
+    .right {
+        height: auto;
+        overflow: visible;
+        padding: 20px;
+    }
+
+    .focus-iframe-card iframe {
+        height: 600px;
+    }
+}
