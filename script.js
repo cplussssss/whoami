@@ -1,7 +1,7 @@
 /* ════════════════════════════════════
    CONFIG — 把這裡換成你的 Worker 網址
 ════════════════════════════════════ */
-const WORKER_URL = 'https://whoami.sijialai1473.workers.dev/';
+const WORKER_URL = 'https://whoami.sijialai1473.workers.dev';
 const POMODORO_URL = 'https://cplussssss.github.io/Focus/';
 
 /* ════════════════════════════════════
@@ -60,6 +60,13 @@ async function generateTask(simplified = false) {
   goalText = document.getElementById('goalInput')?.value?.trim() || '';
   showScreen('screen-loading');
 
+  // 取最近 5 筆完成紀錄，帶入 prompt 做個人化
+  const recentLog = getLog()
+    .filter(l => l.status === 'done')
+    .slice(0, 5)
+    .map(l => `・${l.title}（${l.duration}，${l.ts.slice(0, 10)}）`)
+    .join('\n');
+
   // JITAI — Tailoring Variables
   const stateMap = {
     exhausted: '非常疲憊，腦子轉不動，精力只剩 1/5',
@@ -80,18 +87,24 @@ async function generateTask(simplified = false) {
     ? '（使用者說上一個任務太難了，請依據JITAI原則再降低一個難度等級）'
     : '';
 
+  const historySection = recentLog
+    ? `使用者最近完成的任務（個人化參考，避免重複，可在此基礎上延伸下一步）：\n${recentLog}`
+    : '（尚無歷史紀錄，請給第一次啟動的任務）';
+
   const prompt = `
 你是一個基於 JITAI（Just-In-Time Adaptive Intervention）設計的 AI 習慣導航員。
 
 使用者當下狀態（Tailoring Variable）：${stateMap[currentState] || '普通'}
 使用者想做：${goalText || '任何有幫助的事'}
 建議任務時間（Decision Rule）：${durationRule[currentState] || '5分鐘'}
+${historySection}
 ${simplifyNote}
 
 請根據 JITAI 原則，在這個「決策點」給出最適合現在開始的最小任務（Intervention Option）。
 
 規則：
 - 任務必須非常具體，不能是「讀書」，要是「打開書本翻到上次的頁面」
+- 如果有歷史紀錄，請根據上次任務的延伸給出下一步，讓使用者感覺有進度感
 - 語氣溫柔，不命令，像朋友建議
 - 不使用「你應該」
 - 精力越低，任務越小、語氣越輕
@@ -171,7 +184,17 @@ function startFocus() {
    POMODORO IFRAME
 ════════════════════════════════════ */
 function showPomodoro() {
-  window.open(POMODORO_URL, '_blank');
+  const card  = document.getElementById('focusIframeCard');
+  const frame = document.getElementById('pomodoroFrame');
+  if (frame.src === 'about:blank' || frame.src === '') {
+    frame.src = POMODORO_URL;
+  }
+  card.classList.add('show');
+  card.scrollIntoView({ behavior: 'smooth' });
+}
+
+function hidePomodoro() {
+  document.getElementById('focusIframeCard').classList.remove('show');
 }
 
 /* ════════════════════════════════════
